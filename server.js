@@ -1,22 +1,14 @@
 const express = require('express');
-const client = require('./conection.js');
+const medicoRoutes = require('./src/medico/routes')
 const app = express();
 const port = 3000;
 
 
-
+app.get('/', (req, res)=>{
+    res.send('Hola from root');
+});
+app.use('/medico',medicoRoutes);
 app.listen(port, ()=>{
-    console.log('app runing!!');    
+    console.log(`app runing on port ${port}!!`);    
 });
 
-app.get('/medicos', (req, resp)=>{
-    //resp.send('hola');
-    var sql='select id, name from tt_visitas_medico';
-    client.query(sql,(err, result)=>{
-        if(!err){
-            resp.send(result.rows);
-        }
-    });
-    client.end;
-});
-client.connect();
