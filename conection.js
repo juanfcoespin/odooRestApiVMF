@@ -6,4 +6,5 @@
         password: "odoo",
         database: "vmf"
     });
+    dbClient.connect();
     module.exports = dbClient;
