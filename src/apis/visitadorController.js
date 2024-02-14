@@ -1,44 +1,31 @@
 const {Router} = require('express');
-const clientDb = require('../../conection');
+const visitadorBusiness = require('../business/visitadorBusiness');
 const router = Router();
 
-router.get('/getIdByMail/:email', (req, res)=>{
+router.get('/getByMail/:email', (req, res)=>{
     const email = req.params.email;
-    var sql=`select * from tt_visitas_visitador where email='${email}' limit 1`;
-    clientDb.query(sql,(err, result)=>{
-        if(!err){
-            res.send(result.rows);
-        }
+    visitadorBusiness.getByMail(email).then(me=>{
+        res.send(me);
     });
 });
-
 router.get('/getRutasByIdVisitador/:idVisitador', (req, res)=>{
     const idVisitador = parseInt(req.params.idVisitador);
-    var sql=`
-       select 
-        t0.dia_ciclo diaCiclo,
-        t2.id idunidadVisita,
-        t2.name unidadVisita
-       from tt_visitas_ruta t0 left join
-        tt_visitas_medico_tt_visitas_ruta_rel t1 on t1.tt_visitas_ruta_id=t0.id inner join
-        tt_visitas_medico t2 on t2.id=t1.tt_visitas_medico_id
-       union all  
-       select
-        t0.dia_ciclo diaCiclo,
-        t2.id idunidadVisita,
-        t2.name unidadVisita
-       from tt_visitas_ruta t0 inner join
-        tt_visitas_farmacia_tt_visitas_ruta_rel t1 on t1.tt_visitas_ruta_id=t0.id inner join
-        tt_visitas_farmacia t2 on t2.id = t1.tt_visitas_farmacia_id
-        
-       where 
-        visitador_id=${idVisitador} 
-       order by diaCiclo
-    `;
-    clientDb.query(sql,(err, result)=>{
-        if(!err){
-            res.send(result.rows);
-        }
+    visitadorBusiness.getRutasByIdVisitador(idVisitador).then(me=>{
+        res.send(me);
+    });
+});
+router.post('/getVisitasByIdCicloIdVisitador', (req, res)=>{
+    const idVisitador = req.body.idVisitador;
+    const idCiclo = req.body.idCiclo;
+    visitadorBusiness.getVisitasByIdCicloIdVisitador(idCiclo,idVisitador).then(me=>{
+        res.send(me);
+    });
+});
+router.post('/getVisitasPendientesByIdCicloIdVisitador', (req, res)=>{
+    const idVisitador = req.body.idVisitador;
+    const idCiclo = req.body.idCiclo;
+    visitadorBusiness.getVisitasPendientesByIdCicloIdVisitador(idCiclo,idVisitador).then(me=>{
+        res.send(me);
     });
 });
 module.exports = router;

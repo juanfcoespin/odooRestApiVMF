@@ -1,22 +1,17 @@
 const {Router} = require('express');
-const clientDb = require('../../conection');
+const medicoBusiness = require('../business/medicoBusiness');
 const router = Router();
 
+
 router.get('/', (req, res)=>{
-    var sql='select id, name from tt_visitas_medico';
-    clientDb.query(sql,(err, result)=>{
-        if(!err){
-            res.send(result.rows);
-        }
+    medicoBusiness.getMedicos().then(me=>{
+        res.send(me);
     });
 });
 router.get('/getById/:id', (req, res)=>{
     const id = parseInt(req.params.id);
-    var sql='select id, name from tt_visitas_medico where id='+id;
-    clientDb.query(sql,(err, result)=>{
-        if(!err){
-            res.send(result.rows);
-        }
+    medicoBusiness.getById(id).then(me=>{
+        res.send(me);
     });
 });
 module.exports = router;
