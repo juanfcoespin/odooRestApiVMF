@@ -1,4 +1,5 @@
 const dbUtils = require('../utils/dbUtils');
+const cicloBusiness = require('./cicloBusiness');
 
 async function getRutasByIdVisitador(idVisitador){
     var sql=`
@@ -40,8 +41,19 @@ async function getRutasByIdVisitador(idVisitador){
     return await dbUtils.getRows(sql);
 }
 async function getByMail(email){
-    var sql=`select * from tt_visitas_visitador where email='${email}' limit 1`;
-    return await dbUtils.getRows(sql);
+    var sql=`
+        select 
+         id,
+         ciudad_id,
+         tipo_representante_id,
+         meta_compra_ciclo,
+         meta_visitas_medicos_ciclo,
+         meta_visitas_farmacias_ciclo
+        from
+         tt_visitas_visitador 
+        where
+         email='${email}' limit 1`;
+    return await dbUtils.getItem(sql);
 }
 async function getVisitasByIdCicloIdVisitador(idCiclo, idVisitador){
     var sql=`
@@ -95,20 +107,28 @@ async function getVisitasByIdCicloIdVisitador(idCiclo, idVisitador){
     `;
     return await dbUtils.getRows(sql);
 }
-async function getVisitasPendientesByIdCicloIdVisitador(idCiclo, idVisitador){
-    
-    var rutas = await getRutasByIdVisitador(idVisitador);
-    const visitas = await getVisitasByIdCicloIdVisitador(idCiclo, idVisitador);
-    visitas.forEach(visita=>{
-        rutas = rutas.filter(ruta=>!(ruta.diaCiclo==visita.diaCiclo && ruta.idUnidadVisita==visita.idUnidadVisita && ruta.tipo==visita.tipo));
-    });
-    return rutas;
+async function getVisitasPendientesByIdVisitador(idVisitador){
+    var ms={};
+    var cicloActual = await cicloBusiness.getCicloActual();
+    if(cicloActual){
+        var rutas = await getRutasByIdVisitador(idVisitador);
+        const visitas = await getVisitasByIdCicloIdVisitador(cicloActual.id, idVisitador);
+        visitas.forEach(visita=>{
+            rutas = rutas.filter(ruta=>!(ruta.diaCiclo==visita.diaCiclo && ruta.idUnidadVisita==visita.idUnidadVisita && ruta.tipo==visita.tipo));
+        });
+        ms={
+            "cicloActual": cicloActual,
+            "unidadesPorVisitar": rutas
+        };
+    }else
+        ms={"error": "No existe un ciclo activo en la fecha consultada"};
+    return ms;
 }
 module.exports={
     getRutasByIdVisitador,
     getByMail,
     getVisitasByIdCicloIdVisitador,
-    getVisitasPendientesByIdCicloIdVisitador
+    getVisitasPendientesByIdVisitador,
 }
     
     

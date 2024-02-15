@@ -21,10 +21,9 @@ router.post('/getVisitasByIdCicloIdVisitador', (req, res)=>{
         res.send(me);
     });
 });
-router.post('/getVisitasPendientesByIdCicloIdVisitador', (req, res)=>{
-    const idVisitador = req.body.idVisitador;
-    const idCiclo = req.body.idCiclo;
-    visitadorBusiness.getVisitasPendientesByIdCicloIdVisitador(idCiclo,idVisitador).then(me=>{
+router.get('/getVisitasPendientesByIdVisitador/:idVisitador', (req, res)=>{
+    const idVisitador = parseInt(req.params.idVisitador);
+    visitadorBusiness.getVisitasPendientesByIdVisitador(idVisitador).then(me=>{
         res.send(me);
     });
 });
