@@ -8,22 +8,22 @@ router.get('/getByMail/:email', (req, res)=>{
         res.send(me);
     });
 });
-router.get('/getRutasByIdVisitador/:idVisitador', (req, res)=>{
-    const idVisitador = parseInt(req.params.idVisitador);
-    visitadorBusiness.getRutasByIdVisitador(idVisitador).then(me=>{
+router.get('/getRutasByIdRepresentante/:idRepresentante', (req, res)=>{
+    const idRepresentante = parseInt(req.params.idRepresentante);
+    visitadorBusiness.getRutasByIdRepresentante(idRepresentante).then(me=>{
         res.send(me);
     });
 });
-router.post('/getVisitasByIdCicloIdVisitador', (req, res)=>{
-    const idVisitador = req.body.idVisitador;
+router.post('/getVisitasByIdCicloIdRepresentante', (req, res)=>{
+    const idRepresentante = req.body.idRepresentante;
     const idCiclo = req.body.idCiclo;
-    visitadorBusiness.getVisitasByIdCicloIdVisitador(idCiclo,idVisitador).then(me=>{
+    visitadorBusiness.getVisitasByIdCicloIdRepresentante(idCiclo,idRepresentante).then(me=>{
         res.send(me);
     });
 });
-router.get('/getVisitasPendientesByIdVisitador/:idVisitador', (req, res)=>{
-    const idVisitador = parseInt(req.params.idVisitador);
-    visitadorBusiness.getVisitasPendientesByIdVisitador(idVisitador).then(me=>{
+router.get('/getVisitasPendientesByIdRepresentante/:idRepresentante', (req, res)=>{
+    const idRepresentante = parseInt(req.params.idRepresentante);
+    visitadorBusiness.getVisitasPendientesByIdRepresentante(idRepresentante).then(me=>{
         res.send(me);
     });
 });

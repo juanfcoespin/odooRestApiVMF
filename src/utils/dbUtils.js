@@ -6,8 +6,12 @@ async function getRows(sql){
         await clientDb.connect();
         const ms = await clientDb.query(sql);
         return ms.rows;
-    }catch(err){
-        throw err;
+    }catch(e){
+        var error='\r\nError interno en la bdd: ';
+        if(e && e.routine)
+            error+="\r\nError: "+e.routine;
+        error+='\r\nsql: '+sql;
+        throw error;
     }finally{
         await clientDb.end();
     }
