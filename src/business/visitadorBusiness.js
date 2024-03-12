@@ -8,6 +8,9 @@ async function getRutasByIdRepresentante(idRepresentante){
          tx.dia_ciclo "diaCiclo",
          tx.id "idUnidadVisita",
          tx.name "unidadVisita",
+         tx.direccion,
+         tx.latitud,
+         tx.longitud,
          tx.tipo
         from
         (
@@ -15,6 +18,9 @@ async function getRutasByIdRepresentante(idRepresentante){
             t0.dia_ciclo,
             t2.id,
             t2.name,
+            t2.direccion,
+            t2.latitud,
+            t2.longitud,
             'medico' tipo,
             t0.representante_id
            from tt_visitas_ruta t0 inner join
@@ -27,6 +33,9 @@ async function getRutasByIdRepresentante(idRepresentante){
             t0.dia_ciclo,
             t2.id,
             t2.name,
+            t2.direccion,
+            t2.latitud,
+            t2.longitud,
             'farmacia' tipo,
             t0.representante_id
            from tt_visitas_ruta t0 inner join
@@ -137,12 +146,30 @@ async function getVisitasPendientesByIdRepresentante(idRepresentante){
             const visitas = await getVisitasByIdCicloIdRepresentante(cicloActual.id, idRepresentante);
             if(visitas.error)
                 throw(visitas.error); 
+            
             visitas.forEach(visita=>{
                 rutas = rutas.filter(ruta=>!(ruta.diaCiclo==visita.diaCiclo && ruta.idUnidadVisita==visita.idUnidadVisita && ruta.tipo==visita.tipo));
             });
+            var diasCiclo=[];
+            var diaCicloAnt;
+            rutas.forEach(r=>{
+                if(r.diaCiclo!=diaCicloAnt){
+                    diasCiclo.push({
+                        "dia": r.diaCiclo,
+                        "rutas":[]
+                    });
+                    diaCicloAnt=r.diaCiclo;
+                }
+            });
+            diasCiclo.forEach(diaCiclo=>{
+                rutas.forEach(r=>{
+                    if(diaCiclo.dia==r.diaCiclo)
+                        diaCiclo.rutas.push(r);
+                });
+            });
             return{
                 "cicloActual": cicloActual,
-                "unidadesPorVisitar": rutas
+                "diasCiclo": diasCiclo,
             };
         }else
             throw("No existe un ciclo activo en la fecha consultada");
