@@ -24,6 +24,6 @@
         user: "odoo17",
         port: 5432,
         password: "odoo17",
-        database: "vmf"
+        database: "vmf.jbp.com.ec"
     };
     module.exports = confDb;
