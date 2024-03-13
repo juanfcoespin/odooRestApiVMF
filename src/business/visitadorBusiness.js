@@ -132,13 +132,15 @@ async function getVisitasByIdCicloIdRepresentante(idCiclo, idRepresentante){
         return await dbUtils.getRows(sql);
     }catch(e){
         return{
-            "error": '\r\ngetVisitasByIdCicloIdVisitador: '+e
+            "error": '\r\getVisitasByIdCicloIdRepresentante: '+e
         };
     }
 }
 async function getVisitasPendientesByIdRepresentante(idRepresentante){
     try{
         var cicloActual = await cicloBusiness.getCicloActual();
+        if(cicloActual && cicloActual.error)
+            throw(cicloActual.error);
         if(cicloActual){
             var rutas = await getRutasByIdRepresentante(idRepresentante);
             if(rutas.error)
@@ -175,7 +177,7 @@ async function getVisitasPendientesByIdRepresentante(idRepresentante){
             throw("No existe un ciclo activo en la fecha consultada");
     }catch(e){
         return {
-            "error": '\r\ngetVisitasPendientesByIdVisitador: '+e
+            "error": '\r\getVisitasPendientesByIdRepresentante: '+e
         };
     }
 }

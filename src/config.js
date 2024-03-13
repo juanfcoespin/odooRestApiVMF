@@ -1,18 +1,21 @@
     
     //mac
-    /*const dbClient = new Client({
+    const confDb = {
         host: "localhost",
         user: "mac",
         port: 5432,
         password: "odoo",
         database: "vmf"
-    });*/
+    };
+
+    //node server.js
+
     //portatil oficina
-    const confDb={
+    /*const confDb={
         host: "localhost",
         user: "openpg",
         port: 5432,
         password: "openpgpwd",
         database: "vmf"
-    };
+    };*/
     module.exports = confDb;
