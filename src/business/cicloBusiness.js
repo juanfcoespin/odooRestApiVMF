@@ -1,4 +1,5 @@
 const dbUtils = require('../utils/dbUtils');
+const fechaUtils = require('../utils/fechaUtils');
 async function getCicloActual(){
     try{
         var sql=`
@@ -27,45 +28,19 @@ async function getCicloActual(){
     
 }
 function getDiaCicloActual(fechaInicio){
-    
     if(!fechaInicio)
-        return 0;
+        throw('\r\ngetDiaCicloActual(): No se ha especificado Fecha de inicio de ciclo');
     var diaCiclo=0;
-    
-    var fechaActual = obtenerFechaActual();
-    //throw(fechaActual);
-    var fechaDiaCiclo = getDateFromStrDate(fechaInicio);
+    var fechaActual = fechaUtils.obtenerFechaActual();
+    var fechaDiaCiclo = fechaUtils.getDateFromStrDate(fechaInicio);
     while(fechaDiaCiclo<=fechaActual){
         fechaDiaCiclo.setDate(fechaDiaCiclo.getDate()+1); 
-        if(esDiaLaboral(fechaDiaCiclo))
+        if(fechaUtils.esDiaLaboral(fechaDiaCiclo))
             diaCiclo++;
     } 
     return diaCiclo;
 }
-function getDateFromStrDate(strDate){ //yyyy-mm-dd
-    //throw(strDate);
-    var año= parseInt(strDate.substring(0,4));
-    //throw(año);
-    var mes= parseInt(strDate.substring(5,7));
-    //throw(mes);
-    var dia= parseInt(strDate.substring(8,10));
-    //throw(dia);
-    var ms= new Date(año, mes, dia);
-    throw(ms);
-    return ms;
 
-}
-function obtenerFechaActual() {
-    var fecha = new Date();
-    var año = fecha.getFullYear();
-    var mes = (fecha.getMonth() + 1).toString().padStart(2, '0'); // Se suma 1 ya que los meses van de 0 a 11
-    var dia = fecha.getDate().toString().padStart(2, '0');
-    return new Date(año,mes,dia);
-}
-
-function esDiaLaboral(fecha){
-    return fecha.getDay() >= 1 && fecha.getDay() <= 5;
-}
 module.exports={
     getCicloActual,
 }

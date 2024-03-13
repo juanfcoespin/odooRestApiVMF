@@ -158,6 +158,7 @@ async function getVisitasPendientesByIdRepresentante(idRepresentante){
                 if(r.diaCiclo!=diaCicloAnt){
                     diasCiclo.push({
                         "dia": r.diaCiclo,
+                        "mostrar": (r.diaCiclo == cicloActual.diaCicloActual),
                         "rutas":[]
                     });
                     diaCicloAnt=r.diaCiclo;
