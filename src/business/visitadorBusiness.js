@@ -65,7 +65,6 @@ async function getByMail(email){
         select 
             t0.id,
             t1.name tipo_representante,
-            t0.meta_compra_ciclo,
             t0.meta_visitas_medicos_ciclo,
             t0.meta_visitas_farmacias_ciclo
         from

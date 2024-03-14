@@ -3,9 +3,9 @@ async function getInventarioByMailRepresentante(email){
     try{
         var sql=`
         select
-         t3.id idArticulo,
+         t3.id "idArticulo",
          t3.name articulo,
-         t4.name tipoArticulo,
+         t4.name "tipoArticulo",
          t2.cantidad
         from
          tt_visitas_bodega t0 inner join
