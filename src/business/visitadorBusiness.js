@@ -5,6 +5,7 @@ async function getRutasByIdRepresentante(idRepresentante){
     try{
         var sql=`
         select 
+         tx.idRuta,
          tx.dia_ciclo "diaCiclo",
          tx.id "idUnidadVisita",
          tx.name "unidadVisita",
@@ -15,6 +16,7 @@ async function getRutasByIdRepresentante(idRepresentante){
         from
         (
            select 
+            t0.id idRuta,
             t0.dia_ciclo,
             t2.id,
             t2.name,
@@ -30,6 +32,7 @@ async function getRutasByIdRepresentante(idRepresentante){
             t2.Activo=True
            union all  
            select
+            t0.id idRuta,
             t0.dia_ciclo,
             t2.id,
             t2.name,
