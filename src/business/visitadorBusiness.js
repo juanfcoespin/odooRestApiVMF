@@ -5,7 +5,7 @@ async function getRutasByIdRepresentante(idRepresentante){
     try{
         var sql=`
         select 
-         tx.idRuta,
+         tx."idRuta",
          tx.dia_ciclo "diaCiclo",
          tx.id "idUnidadVisita",
          tx.name "unidadVisita",
@@ -16,7 +16,7 @@ async function getRutasByIdRepresentante(idRepresentante){
         from
         (
            select 
-            t0.id idRuta,
+            t0.id "idRuta",
             t0.dia_ciclo,
             t2.id,
             t2.name,
@@ -184,11 +184,59 @@ async function getVisitasPendientesByIdRepresentante(idRepresentante){
         };
     }
 }
+async function getIdRuta(representanteId, diaCiclo,tablaRepresentante){
+    try{
+        
+        var sql=`
+        select 
+         t0.id 
+        from 
+         tt_visitas_ruta t0 inner join
+         ${tablaRepresentante} t1 on 
+            t1.id=t0.representante_id
+        where
+         t0.representante_id =${representanteId}
+         and t0.dia_ciclo=${diaCiclo}
+        limit 1
+        `;
+        return await dbUtils.getScalar(sql);
+
+    }catch(e){
+        return {
+            "error": '\r\ngetIdRuta: '+e
+        };
+    }
+}
+async function saveVisita(visita){
+    try{
+        const tablaRepresentante = (visita.tipoUnidad=='medico')?'tt_visitas_medico':'tt_visitas_farmacia';
+        const unidadFK = (visita.tipoUnidad=='medico')?'medico_id':'farmacia_id';
+        const idRuta = await getIdRuta(visita.idUnidad, visita.diaCicloActual, tablaRepresentante);
+        if(idRuta && idRuta.error)
+            throw(idRuta.error);
+        sql=`
+        insert into ${tablaRepresentante}(ciclo_id, ruta_id, fecha, comentario, ${unidadFK})
+        values(${visita.idCiclo}, ${idRuta}, now(), '${visita.comentario}', ${visita.idUnidad})
+        `;
+        dbUtils.execute(sql);
+        sql=`select top 1 from ${tablaRepresentante} order by id desc`;
+        const idVisita=dbUtils.getScalar(sql);
+        return {
+            id: idVisita,
+        };
+
+    }catch(e){
+        return {
+            "error": '\r\nsaveVisita: '+e
+        };
+    }
+}
 module.exports={
     getRutasByIdRepresentante,
     getByMail,
     getVisitasByIdCicloIdRepresentante,
     getVisitasPendientesByIdRepresentante,
+    saveVisita,
 }
     
     
