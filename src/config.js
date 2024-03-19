@@ -8,7 +8,8 @@
         database: "vmf"
     };*/
 
-    //node server.js
+    //node server.js (para el servidor)
+    //npm run dev (para desarrollo)
 
     //portatil oficina
     const confDb={
@@ -16,8 +17,12 @@
         user: "openpg",
         port: 5432,
         password: "openpgpwd",
-        database: "vmf"
+        database: "vmf",
     };
+    const confGlobal={
+        zonaHorariaUTF: -5
+    };
+
     //servidor
     /*const confDb={
         host: "localhost",
@@ -26,4 +31,7 @@
         password: "odoo17",
         database: "vmf.jbp.com.ec"
     };*/
-    module.exports = confDb;
+    module.exports = {
+        confDb,
+        confGlobal,
+    };

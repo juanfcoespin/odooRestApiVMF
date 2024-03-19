@@ -1,3 +1,4 @@
+const conf = require('../config');
 const dbUtils = require('../utils/dbUtils');
 const cicloBusiness = require('./cicloBusiness');
 
@@ -184,50 +185,78 @@ async function getVisitasPendientesByIdRepresentante(idRepresentante){
         };
     }
 }
-async function getIdRuta(representanteId, diaCiclo,tablaRepresentante){
-    try{
-        
-        var sql=`
-        select 
-         t0.id 
-        from 
-         tt_visitas_ruta t0 inner join
-         ${tablaRepresentante} t1 on 
-            t1.id=t0.representante_id
-        where
-         t0.representante_id =${representanteId}
-         and t0.dia_ciclo=${diaCiclo}
-        limit 1
-        `;
-        return await dbUtils.getScalar(sql);
 
-    }catch(e){
-        return {
-            "error": '\r\ngetIdRuta: '+e
-        };
-    }
-}
 async function saveVisita(visita){
     try{
-        const tablaRepresentante = (visita.tipoUnidad=='medico')?'tt_visitas_medico':'tt_visitas_farmacia';
-        const unidadFK = (visita.tipoUnidad=='medico')?'medico_id':'farmacia_id';
-        const idRuta = await getIdRuta(visita.idUnidad, visita.diaCicloActual, tablaRepresentante);
+        const idRuta = await getIdRuta(visita);
+        if(!idRuta){
+            const error=`
+                No existen rutas para  el representante ${visita.idRepresentante} en el diaCiclo:${visita.diaCicloActual}
+                Solicite al administrador la creación de esta ruta!!`
+            throw(error);
+        }
         if(idRuta && idRuta.error)
             throw(idRuta.error);
-        sql=`
-        insert into ${tablaRepresentante}(ciclo_id, ruta_id, fecha, comentario, ${unidadFK})
-        values(${visita.idCiclo}, ${idRuta}, now(), '${visita.comentario}', ${visita.idUnidad})
+        //odoo maneja la hora utf, para traer la fecha actual hay que hacer lo siguiente
+        var sql=`
+        insert into tt_visitas_visita_${visita.tipoUnidad}(ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id)
+        values($1, $2, now()- interval '${conf.confGlobal.zonaHorariaUTF} hour', $3, $4);
         `;
-        dbUtils.execute(sql);
-        sql=`select top 1 from ${tablaRepresentante} order by id desc`;
-        const idVisita=dbUtils.getScalar(sql);
+        var params=[visita.idCiclo, idRuta,visita.comentario, visita.idUnidad];
+        
+        var inserto=await dbUtils.execute(sql, params);
+        if(!inserto)
+            throw('No se registró la visita!!');
+        sql=`select id from tt_visitas_visita_${visita.tipoUnidad} order by id desc limit 1`;
+        
+        const me= await dbUtils.getItem(sql);
+        /*console.log(me);
+        console.log('checkPoint');
+        throw('checkPoint');*/
+        const idVisita = me.id;
+        visita.lineas.forEach(linea=>{
+            sql=`
+            insert into tt_visitas_visita_${visita.tipoUnidad}_linea(visita_id, articulo_id, cantidad)
+            values($1, $2, $3)
+            `;
+            params=[idVisita, linea.articulo.id, linea.cantidad];
+            if(!dbUtils.execute(sql, params))
+                throw(`No se registró la linea de visita correspondiente al artículo ${linea.articulo.name}!!`);
+        });
+        /*sql = 'COMMIT;'
+        if(!dbUtils.execute(sql))
+            throw('Error al hacer el commit de la transacción!!');*/
         return {
             id: idVisita,
         };
 
     }catch(e){
+        /*sql = 'ROLLBACK;'
+        await dbUtils.execute(sql);*/
         return {
-            "error": '\r\nsaveVisita: '+e
+            "error": '\r\n'+'saveVisita(): '+e
+        };
+    }
+}
+async function getIdRuta(visita){
+    try{
+        var sql=`
+        select 
+         id 
+        from 
+         tt_visitas_ruta 
+        where
+         representante_id =${visita.idRepresentante}
+         and dia_ciclo=${visita.diaCicloActual}
+        limit 1
+        `;
+        ms= await dbUtils.getItem(sql);
+        if(ms)
+            return ms.id;
+        return null;
+    }catch(e){
+        return {
+            "error": '\r\n'+'getIdRuta(): '+ e
         };
     }
 }
