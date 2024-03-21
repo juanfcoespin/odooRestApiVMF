@@ -1,8 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const medicoRoutes = require('./src/apis/medicoController')
-const visitadorRoutes = require('./src/apis/visitadorController')
-const articuloRoutes = require('./src/apis/articuloController')
+const medicoRoutes = require('./src/apis/medicoController');
+const farmaciaRoutes = require('./src/apis/farmaciaController');
+const visitadorRoutes = require('./src/apis/visitadorController');
+const articuloRoutes = require('./src/apis/articuloController');
 const app = express();
 var cors = require('cors')
 
@@ -22,6 +23,7 @@ app.post('/tmp', (req, res)=>{
 });
 //escucha las apis de medico
 app.use('/medico',medicoRoutes);
+app.use('/farmacia',farmaciaRoutes);
 app.use('/visitador',visitadorRoutes);
 app.use('/articulo',articuloRoutes);
 app.listen(port, ()=>{
