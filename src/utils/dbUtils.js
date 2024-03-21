@@ -12,7 +12,7 @@ async function query(sql, params=null){
         if(e && e.routine)
             error+="\r\nError: "+e.routine;
         error+='\r\nsql: '+sql;
-        throw error;
+        throw(error);
     }finally{
         await clientDb.end();
     }
