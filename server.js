@@ -1,13 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const medicoRoutes = require('./src/apis/medicoController');
-const farmaciaRoutes = require('./src/apis/farmaciaController');
-const visitadorRoutes = require('./src/apis/visitadorController');
-const articuloRoutes = require('./src/apis/articuloController');
+const valoresRoutes = require('./src/apis/valoresController');
 const app = express();
 var cors = require('cors')
 
-const port = 3000;
+const port = 3001;
 
 //para iniciar el servicio: node server.js
 
@@ -15,18 +12,13 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.get('/', (req, res)=>{
-    res.send(`nginx bus de servicios vmf on port ${port}!!`);
+    res.send(`nginx bus de servicios sitrad on port ${port}!!`);
 });
-app.post('/tmp', (req, res)=>{
-    const data = req.body;
-    res.send(data);
-});
-//escucha las apis de medico
-app.use('/medico',medicoRoutes);
-app.use('/farmacia',farmaciaRoutes);
-app.use('/visitador',visitadorRoutes);
-app.use('/articulo',articuloRoutes);
+
+//escucha las apis de valores
+app.use('/valores',valoresRoutes);
+
 app.listen(port, ()=>{
-    console.log(`nginx bus de servicios vmf on port ${port}!!`);    
+    console.log(`nginx bus de servicios sitrad hibrido on port ${port}!!`);    
 });
 

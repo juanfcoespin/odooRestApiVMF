@@ -8,29 +8,41 @@ async function query(sql, params=null){
         return ms;
     }catch(e){
         //console.log(e);
-        var error='\r\nError interno en la bdd: ';
+        var error='\r\ndbUtils.query()\r\nError interno en la bdd: ';
         if(e && e.routine)
             error+="\r\nError: "+e.routine;
         error+='\r\nsql: '+sql;
-        throw error;
+        throw(error);
     }finally{
         await clientDb.end();
     }
 }
 async function getRows(sql, params=null){
-    const ms= await query(sql, params);
-    return ms.rows;
+    try{
+        const ms= await query(sql, params);
+        return ms.rows;
+    }catch(e){
+        throw('\r\ndbUtils.getRows()'+e);
+    }
+    
 }
 async function execute(sql, params){
-    const ms= await query(sql, params);
-    return (ms.rowCount>0)?true:false;
+    try{
+        const ms= await query(sql, params);
+        return (ms.rowCount>0)?true:false;
+    }catch(e){
+        throw('\r\ndbUtils.execute()'+e);
+    }
 }
-
-async function getItem(sql){
-    const matrix = await getRows(sql);
-    if(matrix && matrix.length>0)
-     return matrix[0];
-    return null; 
+async function getItem(sql, params=null){
+    try{
+        const matrix = await getRows(sql, params);
+        if(matrix && matrix.length>0)
+         return matrix[0];
+        return null; 
+    }catch(e){
+        throw('\r\ndbUtils.getItem()'+e);
+    }
 }
 module.exports={
     getRows,
