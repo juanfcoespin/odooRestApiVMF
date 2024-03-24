@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const medicoRoutes = require('./src/apis/medicoController');
+const distribuidorRoutes = require('./src/apis/distribuidorController');
 const farmaciaRoutes = require('./src/apis/farmaciaController');
 const visitadorRoutes = require('./src/apis/visitadorController');
 const articuloRoutes = require('./src/apis/articuloController');
@@ -23,6 +24,7 @@ app.post('/tmp', (req, res)=>{
 });
 //escucha las apis de medico
 app.use('/medico',medicoRoutes);
+app.use('/distribuidor',distribuidorRoutes);
 app.use('/farmacia',farmaciaRoutes);
 app.use('/visitador',visitadorRoutes);
 app.use('/articulo',articuloRoutes);
