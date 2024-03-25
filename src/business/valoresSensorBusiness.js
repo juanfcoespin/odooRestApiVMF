@@ -25,7 +25,7 @@ async function saveItem(item, ms, idSensor){
     //const fecha=`to_timestamp('${item.fecha}','yyyy-mm-dd HH:MI:SS') - interval '-5 hour'`
     const fecha=`'${item.fecha}' - interval '-5 hour'`
     var sql=`
-    insert into tt_sitrad_medicion_sensor(area_sensor_id, valor, fecha)
+    insert into tt_sitrad_medicion_sensor(area_sensor_id, valor, fecha_utf)
     values($1, $2, $3);
     `;
     var params=[idSensor, item.valor, item.fecha];
