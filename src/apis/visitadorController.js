@@ -21,15 +21,15 @@ router.post('/getVisitasByIdCicloIdRepresentante', (req, res)=>{
         res.send(me);
     });
 });
-router.post('/saveVisita', (req, res)=>{
-    const visita = req.body;
-    visitadorBusiness.saveVisita(visita).then(me=>{
+router.post('/saveVisitas', (req, res)=>{
+    const visitas = req.body;
+    visitadorBusiness.saveVisitas(visitas).then(me=>{
         res.send(me);
     });
 });
-router.get('/getVisitasPendientesByIdRepresentante/:idRepresentante', (req, res)=>{
-    const idRepresentante = parseInt(req.params.idRepresentante);
-    visitadorBusiness.getVisitasPendientesByIdRepresentante(idRepresentante).then(me=>{
+router.get('/getVisitasPendientesByEmailRepresentante/:email', (req, res)=>{
+    const email = req.params.email;
+    visitadorBusiness.getVisitasPendientesByEmailRepresentante(email).then(me=>{
         res.send(me);
     });
 });

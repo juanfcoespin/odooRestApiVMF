@@ -24,6 +24,29 @@ async function getInventarioByMailRepresentante(email){
         };
     }
 }
+async function getArticulosVenta(){
+    try{
+        var sql=`
+        select
+         t0.id,
+         t0.name,
+         t0.precio
+        from
+         tt_visitas_articulo t0 inner join
+         tt_visitas_tipo_articulo t1 on t1.id=t0.tipo_articulo_id
+        where
+         t1.name='Producto Terminado' 
+        `;
+
+        return await dbUtils.getRows(sql);
+    }catch(e){
+        return{
+            "error": '\r\getMedicosByEmailRepresentante'+e
+        };
+    }
+}
+
 module.exports={
     getInventarioByMailRepresentante,
+    getArticulosVenta,
 }

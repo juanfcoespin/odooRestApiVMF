@@ -8,4 +8,10 @@ router.get('/getInventarioByEmailRepresentante/:email', (req, res)=>{
         res.send(me);
     });
 });
+router.get('/getArticulosVenta', (req, res)=>{
+    articuloBusiness.getArticulosVenta().then(me=>{
+        res.send(me);
+    });
+});
+
 module.exports = router;

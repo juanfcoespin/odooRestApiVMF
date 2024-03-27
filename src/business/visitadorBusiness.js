@@ -2,7 +2,7 @@ const conf = require('../config');
 const dbUtils = require('../utils/dbUtils');
 const cicloBusiness = require('./cicloBusiness');
 
-async function getRutasByIdRepresentante(idRepresentante){
+async function getRutasByEmailRepresentante(email){
     try{
         var sql=`
         select 
@@ -27,10 +27,12 @@ async function getRutasByIdRepresentante(idRepresentante){
             'medico' tipo,
             t0.representante_id
            from tt_visitas_ruta t0 inner join
+			tt_visitas_representante t3 on t3.id=t0.representante_id inner join
             tt_visitas_medico_tt_visitas_ruta_rel t1 on t1.tt_visitas_ruta_id=t0.id inner join
             tt_visitas_medico t2 on t2.id=t1.tt_visitas_medico_id
            where
             t2.Activo=True
+			and t3.email=$1
            union all  
            select
             t0.id idRuta,
@@ -43,22 +45,23 @@ async function getRutasByIdRepresentante(idRepresentante){
             'farmacia' tipo,
             t0.representante_id
            from tt_visitas_ruta t0 inner join
+			tt_visitas_representante t3 on t3.id=t0.representante_id inner join
             tt_visitas_farmacia_tt_visitas_ruta_rel t1 on t1.tt_visitas_ruta_id=t0.id inner join
             tt_visitas_farmacia t2 on t2.id = t1.tt_visitas_farmacia_id
            where
             t2.Activo=True
+			and t3.email=$1
         ) tx
-        where 
-         tx.representante_id=${idRepresentante}
-         order by tx.dia_ciclo
+        order by tx.dia_ciclo
         `;
+        return await dbUtils.getRows(sql,[email]);
     }catch(e){
         return {
             "error": '\r\ngetRutasByIdVisitador: '+e
         }
     }
     
-    return await dbUtils.getRows(sql);
+    
 }
 async function getByMail(email){
     try{
@@ -81,7 +84,7 @@ async function getByMail(email){
     }
     
 }
-async function getVisitasByIdCicloIdRepresentante(idCiclo, idRepresentante){
+async function getVisitasByIdCicloEmailRepresentante(idCiclo, email){
     try{
         var sql=`
         select
@@ -105,9 +108,11 @@ async function getVisitasByIdCicloIdRepresentante(idCiclo, idRepresentante){
           tt_visitas_visita_medico t0 inner join
           tt_visitas_ciclo_promocional t1 on t1.id=t0.ciclo_id inner join
           tt_visitas_ruta t2 on t2.id = t0.ruta_id inner join
-          tt_visitas_medico t3 on t3.id=t0.medico_id
+          tt_visitas_medico t3 on t3.id=t0.medico_id inner join
+		  tt_visitas_representante t4 on t4.id=t2.representante_id
          where
           t1.activo=True
+		  and t4.email=$1
         union all
          select
           t1.name  "ciclo",
@@ -122,33 +127,35 @@ async function getVisitasByIdCicloIdRepresentante(idCiclo, idRepresentante){
           tt_visitas_visita_farmacia t0 inner join
           tt_visitas_ciclo_promocional t1 on t1.id=t0.ciclo_id inner join
           tt_visitas_ruta t2 on t2.id = t0.ruta_id inner join
-          tt_visitas_farmacia t3 on t3.id=t0.farmacia_id
+          tt_visitas_farmacia t3 on t3.id=t0.farmacia_id inner join
+		  tt_visitas_representante t4 on t4.id=t2.representante_id
          where
           t1.activo=True
+		  and t4.email=$1
         ) tx
         where
-         tx.representante_id=${idRepresentante}
-         and tx.ciclo_id=${idCiclo}
+         tx.ciclo_id=$2
         order by
          tx.dia_ciclo
         `;
-        return await dbUtils.getRows(sql);
+        return await dbUtils.getRows(sql,[email, idCiclo]);
     }catch(e){
         return{
-            "error": '\r\getVisitasByIdCicloIdRepresentante: '+e
+            "error": '\r\ngetVisitasByIdCicloIdRepresentante: '+e
         };
     }
 }
-async function getVisitasPendientesByIdRepresentante(idRepresentante){
+async function getVisitasPendientesByEmailRepresentante(email){
     try{
         var cicloActual = await cicloBusiness.getCicloActual();
         if(cicloActual && cicloActual.error)
             throw(cicloActual.error);
         if(cicloActual){
-            var rutas = await getRutasByIdRepresentante(idRepresentante);
+            var rutas = await getRutasByEmailRepresentante(email);
+            console.log(rutas);
             if(rutas.error)
                 throw(rutas.error); 
-            const visitas = await getVisitasByIdCicloIdRepresentante(cicloActual.id, idRepresentante);
+            const visitas = await getVisitasByIdCicloEmailRepresentante(cicloActual.id, email);
             if(visitas.error)
                 throw(visitas.error); 
             
@@ -181,11 +188,24 @@ async function getVisitasPendientesByIdRepresentante(idRepresentante){
             throw("No existe un ciclo activo en la fecha consultada");
     }catch(e){
         return {
-            "error": '\r\getVisitasPendientesByIdRepresentante: '+e
+            "error": '\r\ngetVisitasPendientesByEmailRepresentante: '+e
         };
     }
 }
 
+async function saveVisitas(visitas){
+    var ms=[];
+    for(let visita of visitas){
+        try{
+            await saveVisita(visita);
+            ms.push('ok');
+        }catch(e){
+            ms.push('error:\r\nsaveVisitas'+e);
+            
+        }
+    }
+    return ms;
+}
 async function saveVisita(visita){
     try{
         const idRuta = await getIdRuta(visita);
@@ -210,9 +230,6 @@ async function saveVisita(visita){
         sql=`select id from tt_visitas_visita_${visita.tipoUnidad} order by id desc limit 1`;
         
         const me= await dbUtils.getItem(sql);
-        /*console.log(me);
-        console.log('checkPoint');
-        throw('checkPoint');*/
         const idVisita = me.id;
         visita.lineas.forEach(linea=>{
             sql=`
@@ -223,19 +240,12 @@ async function saveVisita(visita){
             if(!dbUtils.execute(sql, params))
                 throw(`No se registró la linea de visita correspondiente al artículo ${linea.articulo.name}!!`);
         });
-        /*sql = 'COMMIT;'
-        if(!dbUtils.execute(sql))
-            throw('Error al hacer el commit de la transacción!!');*/
         return {
             id: idVisita,
         };
 
     }catch(e){
-        /*sql = 'ROLLBACK;'
-        await dbUtils.execute(sql);*/
-        return {
-            "error": '\r\n'+'saveVisita(): '+e
-        };
+        throw('\r\n'+'saveVisita(): '+e);
     }
 }
 async function getIdRuta(visita){
@@ -261,11 +271,9 @@ async function getIdRuta(visita){
     }
 }
 module.exports={
-    getRutasByIdRepresentante,
     getByMail,
-    getVisitasByIdCicloIdRepresentante,
-    getVisitasPendientesByIdRepresentante,
-    saveVisita,
+    getVisitasPendientesByEmailRepresentante,
+    saveVisitas,
 }
     
     
