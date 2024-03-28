@@ -152,7 +152,7 @@ async function getVisitasPendientesByEmailRepresentante(email){
             throw(cicloActual.error);
         if(cicloActual){
             var rutas = await getRutasByEmailRepresentante(email);
-            console.log(rutas);
+            //console.log(rutas);
             if(rutas.error)
                 throw(rutas.error); 
             const visitas = await getVisitasByIdCicloEmailRepresentante(cicloActual.id, email);
