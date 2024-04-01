@@ -6,7 +6,7 @@ const confGlobal={
 //mac
 const confDb = {
     host: "localhost",
-    user: "mac",
+    user: "odoo",
     port: 5432,
     password: "odoo",
     database: "vmf"
