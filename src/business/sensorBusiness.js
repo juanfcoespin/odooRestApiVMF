@@ -4,19 +4,22 @@ const tipoSensorBusiness = require('./tipoSensorBusiness');
 
 async function getId(me){
     try{
-        if(!await existe(me))
+        if(!await existe(me)){
+            console.log('a guardar sensor!!');
             await save(me);
+        }
+            
         var sql=`
         select 
          t0.id
         from tt_sitrad_area_sensor t0 inner join
          tt_sitrad_area t1 on t1.id=t0.area_id
         where
-         t1.mac_sitrad = '${me.area.mac}'
-         and t0.id_sensor_sitrad = ${me.sensor.id}
+         t0.name = $1
+         and t1.name= $2
         `;
-        params = [me.area.mac, me.sensor.id];
-        var resp = await dbUtils.getItem(sql);
+        var params=[me.sensor.nombre,me.area];
+        var resp = await dbUtils.getItem(sql, params);
         if(resp && resp.id>0)
             return resp.id;
         else 
@@ -34,10 +37,10 @@ async function existe(me){
         from tt_sitrad_area_sensor t0 inner join
          tt_sitrad_area t1 on t1.id=t0.area_id
         where
-         t1.mac_sitrad = $1
-         and t0.id_sensor_sitrad = $2
+         t0.name = $1
+         and t1.name= $2
         `;
-        var params=[me.area.mac, me.sensor.id];
+        var params=[me.sensor.nombre,me.area];
         var resp = await dbUtils.getItem(sql, params);
         return (resp && resp.num>0);
     }catch(e){
@@ -49,10 +52,10 @@ async function save(me){
         const idArea = await areaBusiness.getId(me);
         const idTipoSensor = await tipoSensorBusiness.getId(me);
         var sql=`
-            insert into tt_sitrad_area_sensor(area_id, tipo_sensor_id, name, id_sensor_sitrad)
-            values($1, $2, $3, $4);
+            insert into tt_sitrad_area_sensor(area_id, tipo_sensor_id, name)
+            values($1, $2, $3);
             `;
-        var params=[idArea, idTipoSensor, me.sensor.nombre, me.sensor.id];
+        var params=[idArea, idTipoSensor, me.sensor.nombre];
         await dbUtils.execute(sql, params);
     }catch(e){
         throw('\r\nsensorBusiness.save()'+e)

@@ -4,9 +4,10 @@ async function existe(me){
         var sql=`
             select count(*) num
             from tt_sitrad_area
-            where mac_sitrad = $1 
+            where 
+             name = $1
         `;
-        const resp= await dbUtils.getItem(sql,[me.area.mac]);
+        const resp= await dbUtils.getItem(sql,[me.area]);
         return (resp && resp.num>0);
     }catch(e){
         throw('\r\nareaBusiness.existe()'+e);
@@ -15,10 +16,10 @@ async function existe(me){
 async function save(me){
     try{    
     var sql=`
-        insert into tt_sitrad_area(name, id_area_sitrad, mac_sitrad)
-        values($1, $2, $3);
+        insert into tt_sitrad_area(name)
+        values($1);
     `;
-    var params=[me.area.nombre, me.area.id, me.area.mac];
+    var params=[me.area];
     await dbUtils.execute(sql, params);
     }catch(e){
         throw('\r\nareaBusiness.save()'+e);
@@ -30,9 +31,10 @@ async function getId(me){
             await save(me);
         var sql=`
             select id from tt_sitrad_area
-            where mac_sitrad = $1 
+            where 
+             name = $1
         `;
-        const resp= await dbUtils.getItem(sql,[me.area.mac]);
+        const resp= await dbUtils.getItem(sql,[me.area]);
         if(resp && resp.id)
             return resp.id;
         throw('No existe area con la mac: '+me.area.mac);

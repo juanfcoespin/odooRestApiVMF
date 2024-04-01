@@ -13,7 +13,6 @@ async function save(me){
         }
         return ms;
     }catch(e){
-        console.log(e);
         return {
             "error": '\r\n'+'valoresSensorBusiness.save(): '+e
         };

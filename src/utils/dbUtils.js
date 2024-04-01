@@ -7,11 +7,11 @@ async function query(sql, params=null){
         const ms = (params) ? await clientDb.query(sql, params) : await clientDb.query(sql);
         return ms;
     }catch(e){
-        //console.log(e);
         var error='\r\ndbUtils.query()\r\nError interno en la bdd: ';
         if(e && e.routine)
             error+="\r\nError: "+e.routine;
         error+='\r\nsql: '+sql;
+        console.log(error);
         throw(error);
     }finally{
         await clientDb.end();
