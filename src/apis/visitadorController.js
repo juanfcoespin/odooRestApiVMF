@@ -27,6 +27,12 @@ router.post('/saveVisitas', (req, res)=>{
         res.send(me);
     });
 });
+router.post('/savePedidos', (req, res)=>{
+    const pedidos = req.body;
+    visitadorBusiness.savePedidos(pedidos).then(me=>{
+        res.send(me);
+    });
+});
 router.get('/getVisitasPendientesByEmailRepresentante/:email', (req, res)=>{
     const email = req.params.email;
     visitadorBusiness.getVisitasPendientesByEmailRepresentante(email).then(me=>{

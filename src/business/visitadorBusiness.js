@@ -206,6 +206,18 @@ async function saveVisitas(visitas){
     }
     return ms;
 }
+async function savePedidos(pedidos){
+    var ms=[];
+    for(let pedido of pedidos){
+        try{
+            await savePedido(pedido);
+            ms.push('ok');
+        }catch(e){
+            ms.push('error:\r\nsavePedidos'+e);
+        }
+    }
+    return ms;
+}
 async function saveVisita(visita){
     try{
         const idRuta = await getIdRuta(visita);
@@ -248,6 +260,42 @@ async function saveVisita(visita){
         throw('\r\n'+'saveVisita(): '+e);
     }
 }
+async function savePedido(pedido){
+    try{
+        //odoo maneja la hora utf, para traer la fecha actual hay que hacer lo siguiente
+        const fecha="to_date('"+pedido.fechaPedido.substring(0, 10)+"', 'yyyy-mm-dd')";
+        
+        var sql=`
+        insert into tt_visitas_pedido(distribuidor_id, farmacia_id, fecha, correo_adicional, observaciones)
+        values($1, $2, ${fecha}, $3, $4);
+        `;
+        console.log(sql);
+        //throw(sql);
+        var params=[pedido.distribuidor.id, pedido.farmacia.id, pedido.correoAdicional, pedido.observaciones];
+        await dbUtils.execute(sql, params);
+        
+        sql=`select id from tt_visitas_pedido order by id desc limit 1`;
+        const me= await dbUtils.getItem(sql);
+        const idPedido = me.id;
+        pedido.lineas.forEach(linea=>{
+            if(!linea.porcentajeDescuento)
+                linea.porcentajeDescuento=0;
+            sql=`
+            insert into tt_visitas_pedido_linea(pedido_id, articulo_id, porcentaje_descuento, cantidad, cant_bonificada)
+            values($1, $2, $3, $4, $5)
+            `;
+            params=[idPedido, linea.articulo.id, linea.porcentajeDescuento/100, linea.cantidad, linea.bonificacion];
+            if(!dbUtils.execute(sql, params))
+                throw(`No se registró la linea del pedido correspondiente al artículo ${linea.articulo.name}!!`);
+        });
+        return {
+            id: idPedido,
+        };
+
+    }catch(e){
+        throw('\r\n'+'savePedido(): '+e);
+    }
+}
 async function getIdRuta(visita){
     try{
         var sql=`
@@ -270,10 +318,34 @@ async function getIdRuta(visita){
         };
     }
 }
+async function getPedidosSinFacturasPorEmailRepresentante(email){
+    try{
+        var sql=`
+        select 
+         id 
+        from 
+         tt_visitas_ruta 
+        where
+         representante_id =${visita.idRepresentante}
+         and dia_ciclo=${visita.diaCicloActual}
+        limit 1
+        `;
+        const params=[];
+        ms= await dbUtils.getRows(sql,params);
+        if(ms)
+            return ms.id;
+        return null;
+    }catch(e){
+        return {
+            "error": '\r\n'+'getIdRuta(): '+ e
+        };
+    }
+}
 module.exports={
     getByMail,
     getVisitasPendientesByEmailRepresentante,
     saveVisitas,
+    savePedidos,
 }
     
     
