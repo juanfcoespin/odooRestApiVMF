@@ -45,7 +45,7 @@ async function getByMailRepresentante(email){
                 pedido.subtotal += linea.subtotal;
                 pedido.descuento += linea.descuento;
             });
-            pedido.total = parseFloat(pedido.subtotal - pedido.descuento).toFixed(2);
+            pedido.total = pedido.subtotal - pedido.descuento;
         });
         return pedidos;
     }catch(e){
