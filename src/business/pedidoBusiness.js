@@ -8,13 +8,20 @@ async function getByMailRepresentante(email){
         select 
             t0.id,
             t0.fecha,
-            t2.id "idDistribuidor",	
-            t2.name "distribuidor"
+            to_char(t0.fecha,'yyyy-mm-dd') "fechaStr",
+            t0.distribuidor_id,
+            t3.name "distribuidor",	
+            t0.farmacia_id,	
+            t4.name "farmacia",
+            t2.name "representante"
         from tt_visitas_pedido t0 inner join
             tt_base_contacto t1 on t1.id=t0.distribuidor_id inner join
-            tt_visitas_representante t2 on t2.id=t0.representante_id 
+            tt_visitas_representante t2 on t2.id=t0.representante_id inner join
+            tt_base_contacto t3 on t3.id=t0.distribuidor_id inner join
+            tt_visitas_farmacia t4 on t4.id=t0.farmacia_id
         where
             t2.email=$1
+        order by t0.fecha
         `;
         
 
