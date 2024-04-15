@@ -32,8 +32,14 @@ async function getItem(sql){
      return matrix[0];
     return null; 
 }
+function getDateFromJs(fecha){
+    if(fecha.length<10)
+        return fecha;
+    return "to_date('"+fecha.substring(0, 10)+"', 'yyyy-mm-dd')";
+}
 module.exports={
     getRows,
     getItem,
     execute,
+    getDateFromJs,
 }
