@@ -130,26 +130,30 @@ async function savePedido(pedido){
             };
         }
         var sql=`
-        insert into tt_visitas_pedido(distribuidor_id, farmacia_id, fecha, correo_adicional, observaciones)
-        values($1, $2, ${fecha}, $3, $4);
+        insert into tt_visitas_pedido(representante_id,distribuidor_id, farmacia_id, fecha, correo_adicional, observaciones)
+        values($1, $2, $3, ${fecha}, $4, $5);
         `;
-        var params=[pedido.distribuidor.id, pedido.farmacia.id, pedido.correoAdicional, pedido.observaciones];
+        var params=[pedido.idRepresentante, pedido.distribuidor.id, pedido.farmacia.id, pedido.correoAdicional, pedido.observaciones];
         await dbUtils.execute(sql, params);
         
         sql=`select id from tt_visitas_pedido order by id desc limit 1`;
         const me= await dbUtils.getItem(sql);
         const idPedido = me.id;
-        pedido.lineas.forEach(linea=>{
+        console.log(idPedido);
+        for(let linea of pedido.lineas){
             if(!linea.porcentajeDescuento)
                 linea.porcentajeDescuento=0;
             sql=`
-            insert into tt_visitas_pedido_linea(pedido_id, articulo_id, porcentaje_descuento, cantidad, cant_bonificada)
-            values($1, $2, $3, $4, $5)
+            insert into tt_visitas_pedido_linea(pedido_id, articulo_id, precio, porcentaje_descuento, cantidad, cant_bonificada)
+            values($1, $2, $3, $4, $5, $6)
             `;
-            params=[idPedido, linea.articulo.id, linea.porcentajeDescuento/100, linea.cantidad, linea.bonificacion];
-            if(!dbUtils.execute(sql, params))
+            params=[idPedido, linea.articulo.id, linea.articulo.precio, linea.porcentajeDescuento/100, linea.cantidad, linea.bonificacion];
+            try{
+                await dbUtils.execute(sql, params)
+            }catch(e){
                 throw(`No se registró la linea del pedido correspondiente al artículo ${linea.articulo.name}!!`);
-        });
+            }
+        }
         return {
             id: idPedido,
         };
