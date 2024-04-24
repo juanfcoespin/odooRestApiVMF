@@ -3,22 +3,25 @@
 const confGlobal={
     zonaHorariaUTF: -5
 };
+
 //mac (mac, odoo)
-/*const confDb = {
+const confDb = {
     host: "localhost",
     user: "odoo",
     port: 5432,
     password: "odoo",
     database: "vmf"
-};*/
+};
+
 //portatil oficina
-const confDb={
+/*const confDb={
     host: "localhost",
     user: "openpg",
     port: 5432,
     password: "openpgpwd",
     database: "vmf",
-};
+};*/
+
 //servidor
 /*const confDb={
     host: "localhost",
