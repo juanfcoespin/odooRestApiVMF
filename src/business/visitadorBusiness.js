@@ -1,5 +1,6 @@
 const conf = require('../config');
 const dbUtils = require('../utils/dbUtils');
+const objUtils = require('../utils/objectUtils');
 const cicloBusiness = require('./cicloBusiness');
 
 async function getRutasByEmailRepresentante(email){
@@ -152,19 +153,63 @@ async function getVisitasPendientesByEmailRepresentante(email){
             throw(cicloActual.error);
         if(cicloActual){
             var rutas = await getRutasByEmailRepresentante(email);
-            //console.log(rutas);
             if(rutas.error)
                 throw(rutas.error); 
             const visitas = await getVisitasByIdCicloEmailRepresentante(cicloActual.id, email);
+            /*
+            Para las visitas pendientes se toma en cuenta los siguientes lineamientos:
+             1. El representante solo puede vistar una vez al médico en el ciclo
+             2. Las visitas en la farmacia dependen de la planificacion de rutas (Se consulta el campo "Número de Visitas por Ciclo")
+            */
             if(visitas.error)
                 throw(visitas.error); 
-            
-            visitas.forEach(visita=>{
-                rutas = rutas.filter(ruta=>!(ruta.diaCiclo==visita.diaCiclo && ruta.idUnidadVisita==visita.idUnidadVisita && ruta.tipo==visita.tipo));
+            //analizamos las rutas que hay que excluir
+            //médicos
+            const visitasMedidos=visitas.filter(v=>v.tipo=='medico');
+            const visitasFarmacia=visitas.filter(v=>v.tipo=='farmacia');
+
+            let rutasPendientes = objUtils.getObjectCopy(rutas); //en donde se calculará las rutas pendientes a visitar del representante
+            rutasPendientes=rutasPendientes.sort((a, b) => a.diaCiclo - b.diaCiclo); //se orden por día de ciclo en orden ascendente;
+            //se quitan los médicos ya visitados
+            visitasMedidos.forEach(vm=>{
+                rutasPendientes = rutasPendientes.filter(ruta=>!(ruta.idUnidadVisita==vm.idUnidadVisita && vm.tipo==ruta.tipo));
             });
+            //se quitan las farmacias ya visitadas
+            //numVisitasCiclo
+            rutasFarmaciaAQuitar=[];
+            rutasPendientes.forEach(rp=>{
+                visitasFarmacia.forEach(vf=>{
+                    if(rp.idUnidadVisita==vf.idUnidadVisita &&  rp.tipo==vf.tipo){
+                        numVistasCicloPlanificadas = rutas.filter(r=>r.idUnidadVisita==vf.idUnidadVisita && r.tipo==vf.tipo).length; //por representante
+                        vistasALaFarmacia=visitasFarmacia.filter(v=>v.idUnidadVisita==vf.idUnidadVisita);
+                        numVisitas = vistasALaFarmacia.length;
+                        if(numVisitas>=numVistasCicloPlanificadas){ //se quita la farmacia de las rutas a visitar
+                            rutasPendientes = rutasPendientes.filter(ruta=>!(ruta.idUnidadVisita==vf.idUnidadVisita && ruta.tipo==vf.tipo));
+                        }else{
+                            if(numVisitas>0 && numVistasCicloPlanificadas>numVisitas){
+                                const index=rutasFarmaciaAQuitar.findIndex(p=>p.idFarmacia==vf.idUnidadVisita);
+                                if(index == -1){//si no encontró
+                                    rutasFarmaciaAQuitar.push({
+                                        "diaCiclo":rp.diaCiclo,
+                                        "idFarmacia": vf.idUnidadVisita,
+                                        "numVisitas": numVisitas 
+                                    });
+                                }                                
+                            }
+                        }
+                    }
+                });
+            });
+            console.log(rutasFarmaciaAQuitar);
+            //se quitan las farmacias ya vistadas de las rutas mas antiguas
+            
+            rutasFarmaciaAQuitar.forEach(f=>{
+                rutasPendientes = rutasPendientes.filter(ruta=>!(ruta.idUnidadVisita==f.idFarmacia && ruta.tipo=='farmacia' && ruta.diaCiclo==f.diaCiclo));
+            });
+            //console.log(rutasPendientes);
             var diasCiclo=[];
             var diaCicloAnt;
-            rutas.forEach(r=>{
+            rutasPendientes.forEach(r=>{
                 if(r.diaCiclo!=diaCicloAnt){
                     diasCiclo.push({
                         "dia": r.diaCiclo,
@@ -175,7 +220,7 @@ async function getVisitasPendientesByEmailRepresentante(email){
                 }
             });
             diasCiclo.forEach(diaCiclo=>{
-                rutas.forEach(r=>{
+                rutasPendientes.forEach(r=>{
                     if(diaCiclo.dia==r.diaCiclo)
                         diaCiclo.rutas.push(r);
                 });
