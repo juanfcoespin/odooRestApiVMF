@@ -13,5 +13,9 @@ router.get('/getArticulosVenta', (req, res)=>{
         res.send(me);
     });
 });
-
+router.get('/getMaterialPromocional', (req, res)=>{
+    articuloBusiness.getMaterialPromocional().then(me=>{
+        res.send(me);
+    });
+});
 module.exports = router;

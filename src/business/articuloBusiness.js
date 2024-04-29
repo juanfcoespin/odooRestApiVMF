@@ -50,8 +50,22 @@ async function getArticulosVenta(){
         };
     }
 }
+async function getMaterialPromocional(){
+    try{
+        var sql=`
+            select id,name from tt_visitas_espacio_contratado
+        `;
+
+        return await dbUtils.getRows(sql);
+    }catch(e){
+        return{
+            "error": '\r\getMedicosByEmailRepresentante'+e
+        };
+    }
+}
 
 module.exports={
     getInventarioByMailRepresentante,
     getArticulosVenta,
+    getMaterialPromocional,
 }
