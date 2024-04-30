@@ -61,8 +61,29 @@ async function getRutasByEmailRepresentante(email){
             "error": '\r\ngetRutasByIdVisitador: '+e
         }
     }
-    
-    
+}
+async function getVisitasCicloAnteriorByEmailRepresentante(email){
+    try{
+        var sql=`
+        select id from tt_visitas_ciclo_promocional
+        order by fecha_inicio desc
+        `;
+        ids= await dbUtils.getRows(sql);
+        if(ids.length==1) // no tiene ciclo anterior
+            return [];
+        else if(ids.length>1){
+            idCicloAnterior=ids[1].id;
+            let ms= await getVisitasByIdCicloEmailRepresentante(idCicloAnterior,email,false);
+            for(let visita of ms){
+                visita.lineas = await getLineasVisitaById(visita);
+            }
+            return ms;
+        }
+    }catch(e){
+        return{
+            "error": '\r\ngetVisitasCicloAnteriorByEmailRepresentante: '+e
+        };
+    }
 }
 async function getByMail(email){
     try{
@@ -85,10 +106,11 @@ async function getByMail(email){
     }
     
 }
-async function getVisitasByIdCicloEmailRepresentante(idCiclo, email){
+async function getVisitasByIdCicloEmailRepresentante(idCiclo, email, cicloActivo=true){
     try{
         var sql=`
         select
+         tx."idVisita",
          tx.ciclo,
          tx.dia_ciclo "diaCiclo",
          tx.fecha "fechaVisita",
@@ -97,6 +119,7 @@ async function getVisitasByIdCicloEmailRepresentante(idCiclo, email){
          tx.tipo
         from(
          select
+          t0.id "idVisita",
           t1.name "ciclo",
           t2.dia_ciclo,
           t0.fecha,
@@ -112,10 +135,11 @@ async function getVisitasByIdCicloEmailRepresentante(idCiclo, email){
           tt_visitas_medico t3 on t3.id=t0.medico_id inner join
 		  tt_visitas_representante t4 on t4.id=t2.representante_id
          where
-          t1.activo=True
+          t1.activo=${cicloActivo}
 		  and t4.email=$1
         union all
          select
+          t0.id "idVisita",
           t1.name  "ciclo",
           t2.dia_ciclo,
           t0.fecha,
@@ -131,7 +155,7 @@ async function getVisitasByIdCicloEmailRepresentante(idCiclo, email){
           tt_visitas_farmacia t3 on t3.id=t0.farmacia_id inner join
 		  tt_visitas_representante t4 on t4.id=t2.representante_id
          where
-          t1.activo=True
+          t1.activo=${cicloActivo}
 		  and t4.email=$1
         ) tx
         where
@@ -200,7 +224,6 @@ async function getVisitasPendientesByEmailRepresentante(email){
                     }
                 });
             });
-            console.log(rutasFarmaciaAQuitar);
             //se quitan las farmacias ya vistadas de las rutas mas antiguas
             
             rutasFarmaciaAQuitar.forEach(f=>{
@@ -252,7 +275,9 @@ async function saveVisitas(visitas){
 }
 async function saveVisita(visita){
     try{
+        console.log(visita);
         const idRuta = await getIdRuta(visita);
+        console.log(idRuta);
         if(!idRuta){
             const error=`
                 No existen rutas para  el representante ${visita.idRepresentante} en el diaCiclo:${visita.diaCicloActual}
@@ -280,6 +305,12 @@ async function saveVisita(visita){
                 await insertLineaVisita(visita.tipoUnidad, idVisita, linea);
             }
         }
+        if(visita.lineasCE){
+            for(let linea of visita.lineasCE){
+                await insertLineaControlExhibicion(idVisita, linea);
+            }
+        }
+        
         return {
             id: idVisita,
         };
@@ -287,6 +318,45 @@ async function saveVisita(visita){
     }catch(e){
         throw('\r\n'+'saveVisita(): '+e);
     }
+}
+async function getLineasVisitaById(visita){
+    try{
+        sql=`
+        select articulo_id, cantidad
+        from tt_visitas_visita_${visita.tipo}_linea
+        where visita_id=$1
+    `;
+    var ms=await dbUtils.getRows(sql, [visita.idVisita]);
+    return ms;
+    }catch(e){
+        throw('\r\n'+'getLineasVisitaById(): '+e);
+    }
+}
+async function getLineasControlExhibicionById(idVisita){
+    try{
+        sql=`
+        select articulo, cantidad, tipo, precio, estado, comentario
+        from tt_visitas_control_exhibicion_linea
+        where visita_id=$1
+    `;
+    return await dbUtils.getRows(sql, [idVisita])
+    }catch(e){
+        throw('\r\n'+'getLineaControlExhibicionById(): '+e);
+    }
+}
+async function insertLineaControlExhibicion(idVisita, linea){
+    let articulo='';
+    if(linea.tipoCE=='Competencia')
+        articulo=linea.articulo;
+    else
+        articulo=linea.articulo.name; //del catalogo de producto terminado o material de exhibición
+    sql=`
+    insert into tt_visitas_control_exhibicion_linea(visita_id, articulo, cantidad, tipo, precio, estado, comentario)
+    values($1, $2, $3, $4, $5, $6, $7)
+    `;
+    params=[idVisita, articulo, linea.cantidad, linea.tipoCE, linea.precio, linea.estadoArticuloCE, linea.comentario];
+    if(!await dbUtils.execute(sql, params))
+        throw(`No se registró la linea de Control Exhibicion correspondiente al artículo ${articulo}!!`);
 }
 async function insertLineaVisita(tipoUnidad, idVisita, linea){
     sql=`
@@ -323,6 +393,7 @@ module.exports={
     getByMail,
     getVisitasPendientesByEmailRepresentante,
     saveVisitas,
+    getVisitasCicloAnteriorByEmailRepresentante,
 }
     
     

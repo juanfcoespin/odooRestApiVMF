@@ -12,8 +12,7 @@ var cors = require('cors')
 const port = 3000;
 
 //para iniciar el servicio: node server.js
-
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));//Set Request Size Limit
 app.use(cors());
 
 app.get('/', (req, res)=>{

@@ -139,7 +139,6 @@ async function savePedido(pedido){
         sql=`select id from tt_visitas_pedido order by id desc limit 1`;
         const me= await dbUtils.getItem(sql);
         const idPedido = me.id;
-        console.log(idPedido);
         for(let linea of pedido.lineas){
             if(!linea.porcentajeDescuento)
                 linea.porcentajeDescuento=0;
