@@ -275,15 +275,11 @@ async function saveVisita(visita){
         
         const me= await dbUtils.getItem(sql);
         const idVisita = me.id;
-        visita.lineas.forEach(linea=>{
-            sql=`
-            insert into tt_visitas_visita_${visita.tipoUnidad}_linea(visita_id, articulo_id, cantidad)
-            values($1, $2, $3)
-            `;
-            params=[idVisita, linea.articulo.id, linea.cantidad];
-            if(!dbUtils.execute(sql, params))
-                throw(`No se registró la linea de visita correspondiente al artículo ${linea.articulo.name}!!`);
-        });
+        if(visita.lineas){
+            for(let linea of visita.lineas){
+                await insertLineaVisita(visita.tipoUnidad, idVisita, linea);
+            }
+        }
         return {
             id: idVisita,
         };
@@ -291,6 +287,15 @@ async function saveVisita(visita){
     }catch(e){
         throw('\r\n'+'saveVisita(): '+e);
     }
+}
+async function insertLineaVisita(tipoUnidad, idVisita, linea){
+    sql=`
+    insert into tt_visitas_visita_${tipoUnidad}_linea(visita_id, articulo_id, cantidad)
+    values($1, $2, $3)
+    `;
+    params=[idVisita, linea.articulo.id, linea.cantidad];
+    if(!await dbUtils.execute(sql, params))
+        throw(`No se registró la linea de visita correspondiente al artículo ${linea.articulo.name}!!`);
 }
 async function getIdRuta(visita){
     try{
