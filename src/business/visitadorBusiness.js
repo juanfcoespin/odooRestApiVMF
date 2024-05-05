@@ -62,18 +62,26 @@ async function getRutasByEmailRepresentante(email){
         }
     }
 }
-async function getVisitasCicloAnteriorByEmailRepresentante(email){
+async function getVisitasCiclosAnteriorByEmailRepresentante(email){
+    /*
+    trae las visitas hasta de los 2 penúltimos ciclos
+    Ej. si el ciclo actual es el 5, trae las visitas de los ciclos 3 y 4
+    */
     try{
         var sql=`
         select id from tt_visitas_ciclo_promocional
         order by fecha_inicio desc
+        limit 3
         `;
         ids= await dbUtils.getRows(sql);
-        if(ids.length==1) // no tiene ciclo anterior
+        if(ids.length<=1) // no tiene ciclo anterior
             return [];
-        else if(ids.length>1){
-            idCicloAnterior=ids[1].id;
-            let ms= await getVisitasByIdCicloEmailRepresentante(idCicloAnterior,email,false);
+        else{ 
+            if(ids.length==2)
+                idsCicloAnterior=ids[1].id;
+            if(ids.length==3)
+                idsCicloAnterior=ids[1].id+', '+ids[2].id;
+            let ms= await getVisitasByIdsCicloEmailRepresentante(idsCicloAnterior,email);
             for(let visita of ms){
                 visita.lineas = await getLineasVisitaById(visita);
             }
@@ -106,7 +114,7 @@ async function getByMail(email){
     }
     
 }
-async function getVisitasByIdCicloEmailRepresentante(idCiclo, email, cicloActivo=true){
+async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email){
     try{
         var sql=`
         select
@@ -135,8 +143,8 @@ async function getVisitasByIdCicloEmailRepresentante(idCiclo, email, cicloActivo
           tt_visitas_medico t3 on t3.id=t0.medico_id inner join
 		  tt_visitas_representante t4 on t4.id=t2.representante_id
          where
-          t1.activo=${cicloActivo}
-		  and t4.email=$1
+          t4.email=$1
+          and t0.ciclo_id in (${idsCiclo})
         union all
          select
           t0.id "idVisita",
@@ -155,15 +163,13 @@ async function getVisitasByIdCicloEmailRepresentante(idCiclo, email, cicloActivo
           tt_visitas_farmacia t3 on t3.id=t0.farmacia_id inner join
 		  tt_visitas_representante t4 on t4.id=t2.representante_id
          where
-          t1.activo=${cicloActivo}
-		  and t4.email=$1
+		  t4.email=$1
+          and t0.ciclo_id in (${idsCiclo})
         ) tx
-        where
-         tx.ciclo_id=$2
         order by
          tx.dia_ciclo
         `;
-        return await dbUtils.getRows(sql,[email, idCiclo]);
+        return await dbUtils.getRows(sql, [email]);
     }catch(e){
         return{
             "error": '\r\ngetVisitasByIdCicloIdRepresentante: '+e
@@ -179,7 +185,7 @@ async function getVisitasPendientesByEmailRepresentante(email){
             var rutas = await getRutasByEmailRepresentante(email);
             if(rutas.error)
                 throw(rutas.error); 
-            const visitas = await getVisitasByIdCicloEmailRepresentante(cicloActual.id, email);
+            const visitas = await getVisitasByIdsCicloEmailRepresentante(cicloActual.id, email);
             /*
             Para las visitas pendientes se toma en cuenta los siguientes lineamientos:
              1. El representante solo puede vistar una vez al médico en el ciclo
@@ -393,7 +399,7 @@ module.exports={
     getByMail,
     getVisitasPendientesByEmailRepresentante,
     saveVisitas,
-    getVisitasCicloAnteriorByEmailRepresentante,
+    getVisitasCiclosAnteriorByEmailRepresentante,
 }
     
     

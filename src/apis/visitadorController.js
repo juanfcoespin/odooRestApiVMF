@@ -41,7 +41,7 @@ router.get('/getVisitasPendientesByEmailRepresentante/:email', (req, res)=>{
 });
 router.get('/getVisitasCicloAnteriorByEmailRepresentante/:email', (req, res)=>{
     const email = req.params.email;
-    visitadorBusiness.getVisitasCicloAnteriorByEmailRepresentante(email).then(me=>{
+    visitadorBusiness.getVisitasCiclosAnteriorByEmailRepresentante(email).then(me=>{
         res.send(me);
     });
 });
