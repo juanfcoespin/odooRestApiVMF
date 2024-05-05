@@ -331,9 +331,13 @@ async function saveVisita(visita){
 async function getLineasVisitaById(visita){
     try{
         sql=`
-        select articulo_id, cantidad
-        from tt_visitas_visita_${visita.tipo}_linea
-        where visita_id=$1
+        select 
+         t0.articulo_id, 
+         t1.name "articulo",
+         t0.cantidad
+        from tt_visitas_visita_${visita.tipo}_linea t0 inner join
+         tt_visitas_articulo t1 on t1.id=t0.articulo_id
+        where t0.visita_id=$1
     `;
     var ms=await dbUtils.getRows(sql, [visita.idVisita]);
     return ms;
