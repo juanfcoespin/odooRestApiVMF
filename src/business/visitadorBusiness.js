@@ -121,10 +121,11 @@ async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email){
          tx."idVisita",
          tx.ciclo,
          tx.dia_ciclo "diaCiclo",
-         tx.fecha "fechaVisita",
+         to_char(tx.fecha,'yyyy-mm-dd') "fechaVisita",
          tx.id "idUnidadVisita",
          tx.name "unidadVisita",
-         tx.tipo
+         tx.tipo,
+         tx.comentario
         from(
          select
           t0.id "idVisita",
@@ -135,7 +136,8 @@ async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email){
           t3.name,
           'medico' tipo,
           t2.representante_id,
-          t0.ciclo_id
+          t0.ciclo_id,
+          t0.comentario
          from 
           tt_visitas_visita_medico t0 inner join
           tt_visitas_ciclo_promocional t1 on t1.id=t0.ciclo_id inner join
@@ -155,7 +157,8 @@ async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email){
           t3.name,
           'farmacia' tipo,
           t2.representante_id,
-          t0.ciclo_id
+          t0.ciclo_id,
+          t0.comentario
          from 
           tt_visitas_visita_farmacia t0 inner join
           tt_visitas_ciclo_promocional t1 on t1.id=t0.ciclo_id inner join
