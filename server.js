@@ -6,6 +6,7 @@ const farmaciaRoutes = require('./src/apis/farmaciaController');
 const visitadorRoutes = require('./src/apis/visitadorController');
 const pedidoRoutes = require('./src/apis/pedidoController');
 const articuloRoutes = require('./src/apis/articuloController');
+const cicloRoutes = require('./src/apis/cicloController');
 const app = express();
 var cors = require('cors')
 
@@ -29,6 +30,7 @@ app.use('/farmacia',farmaciaRoutes);
 app.use('/visitador',visitadorRoutes);
 app.use('/pedido',pedidoRoutes);
 app.use('/articulo',articuloRoutes);
+app.use('/ciclo',cicloRoutes);
 app.listen(port, ()=>{
     console.log(`nginx bus de servicios vmf on port ${port}!!`);    
 });

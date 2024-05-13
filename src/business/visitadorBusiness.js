@@ -114,64 +114,85 @@ async function getByMail(email){
     }
     
 }
-async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email){
+async function getVisitasByIdsCicloEmailRepresentanteConLineas(me){
+    try{
+        let visitas = await getVisitasByIdsCicloEmailRepresentante(me.idCiclo, me.email, me.fechaDesde, me.fechaHasta);
+        for(let visita of visitas){
+            visita.lineas = await getLineasVisitaById(visita);
+        }
+        return visitas;
+    }catch(e){
+        //console.log(e);
+        return{
+            "error": "getVisitasByIdsCicloEmailRepresentanteConLineas: "+e
+        };
+    }
+    
+}
+async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email, fechaDesde=null, fechaHasta=null){
     try{
         var sql=`
+    select
+        tx."idVisita",
+        tx.ciclo,
+        tx.dia_ciclo "diaCiclo",
+        to_char(tx.fecha,'yyyy-mm-dd') "fechaVisita",
+        tx.fecha,
+        tx.id "idUnidadVisita",
+        tx.name "unidadVisita",
+        tx.tipo,
+        tx.comentario
+    from(
         select
-         tx."idVisita",
-         tx.ciclo,
-         tx.dia_ciclo "diaCiclo",
-         to_char(tx.fecha,'yyyy-mm-dd') "fechaVisita",
-         tx.id "idUnidadVisita",
-         tx.name "unidadVisita",
-         tx.tipo,
-         tx.comentario
-        from(
-         select
-          t0.id "idVisita",
-          t1.name "ciclo",
-          t2.dia_ciclo,
-          t0.fecha,
-          t3.id,
-          t3.name,
-          'medico' tipo,
-          t2.representante_id,
-          t0.ciclo_id,
-          t0.comentario
-         from 
-          tt_visitas_visita_medico t0 inner join
-          tt_visitas_ciclo_promocional t1 on t1.id=t0.ciclo_id inner join
-          tt_visitas_ruta t2 on t2.id = t0.ruta_id inner join
-          tt_visitas_medico t3 on t3.id=t0.medico_id inner join
-		  tt_visitas_representante t4 on t4.id=t2.representante_id
-         where
-          t4.email=$1
-          and t0.ciclo_id in (${idsCiclo})
-        union all
-         select
-          t0.id "idVisita",
-          t1.name  "ciclo",
-          t2.dia_ciclo,
-          t0.fecha,
-          t3.id,
-          t3.name,
-          'farmacia' tipo,
-          t2.representante_id,
-          t0.ciclo_id,
-          t0.comentario
-         from 
-          tt_visitas_visita_farmacia t0 inner join
-          tt_visitas_ciclo_promocional t1 on t1.id=t0.ciclo_id inner join
-          tt_visitas_ruta t2 on t2.id = t0.ruta_id inner join
-          tt_visitas_farmacia t3 on t3.id=t0.farmacia_id inner join
-		  tt_visitas_representante t4 on t4.id=t2.representante_id
-         where
-		  t4.email=$1
-          and t0.ciclo_id in (${idsCiclo})
-        ) tx
-        order by
-         tx.dia_ciclo
+         t0.id "idVisita",
+         t1.name "ciclo",
+         t2.dia_ciclo,
+         t0.fecha,
+         t3.id,
+         t3.name,
+         'medico' tipo,
+         t2.representante_id,
+         t0.ciclo_id,
+         t0.comentario,
+          t4.email
+        from 
+         tt_visitas_visita_medico t0 inner join
+         tt_visitas_ciclo_promocional t1 on t1.id=t0.ciclo_id inner join
+         tt_visitas_ruta t2 on t2.id = t0.ruta_id inner join
+         tt_visitas_medico t3 on t3.id=t0.medico_id inner join
+         tt_visitas_representante t4 on t4.id=t2.representante_id
+       union all
+        select
+         t0.id "idVisita",
+         t1.name  "ciclo",
+         t2.dia_ciclo,
+         t0.fecha,
+         t3.id,
+         t3.name,
+         'farmacia' tipo,
+         t2.representante_id,
+         t0.ciclo_id,
+         t0.comentario,
+          t4.email
+        from 
+         tt_visitas_visita_farmacia t0 inner join
+         tt_visitas_ciclo_promocional t1 on t1.id=t0.ciclo_id inner join
+         tt_visitas_ruta t2 on t2.id = t0.ruta_id inner join
+         tt_visitas_farmacia t3 on t3.id=t0.farmacia_id inner join
+         tt_visitas_representante t4 on t4.id=t2.representante_id
+        
+       ) tx
+    where
+         tx.email=$1
+         and tx.ciclo_id in (${idsCiclo})
+         
         `;
+        if(fechaDesde && fechaHasta){
+          fechaDesde = fechaDesde.substring(0, 10);
+          fechaHasta = fechaHasta.substring(0, 10);
+          sql+=` and to_date(to_char(tx.fecha,'yyyy-mm-dd'), 'yyyy-mm-dd') between to_date('${fechaDesde}', 'yyyy-mm-dd') and to_date('${fechaHasta}', 'yyyy-mm-dd')`  
+        }
+        sql+=' order by tx.dia_ciclo';
         return await dbUtils.getRows(sql, [email]);
     }catch(e){
         return{
@@ -406,6 +427,7 @@ module.exports={
     getByMail,
     getVisitasPendientesByEmailRepresentante,
     saveVisitas,
+    getVisitasByIdsCicloEmailRepresentanteConLineas,
     getVisitasCiclosAnteriorByEmailRepresentante,
 }
     

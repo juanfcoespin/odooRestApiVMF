@@ -40,7 +40,31 @@ function getDiaCicloActual(fechaInicio){
     } 
     return diaCiclo;
 }
+async function getCiclos(){
+    try{
+        var sql=`
+        select 
+         id,
+         activo,
+         name,
+         to_char(fecha_inicio, 'yyyy-mm-dd') "fechaInicio",
+         to_char(fecha_fin , 'yyyy-mm-dd') "fechaFin" 
+        from tt_visitas_ciclo_promocional
+        order by
+         fecha_inicio desc
+        limit 12
+        `;
+        return await dbUtils.getRows(sql);
+        
+    }catch(e){
+        return {
+            "error": '\r\n'+'getCiclos() '+e
+        };
+    }
+    
+}
 
 module.exports={
     getCicloActual,
+    getCiclos,
 }

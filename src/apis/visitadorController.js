@@ -8,6 +8,12 @@ router.get('/getByMail/:email', (req, res)=>{
         res.send(me);
     });
 });
+router.post('/getVisitasByIdCicloYEmail', (req, res)=>{
+    visitadorBusiness.getVisitasByIdsCicloEmailRepresentanteConLineas(req.body).then(me=>{
+        res.send(me);
+    });
+});
+
 router.get('/getRutasByIdRepresentante/:idRepresentante', (req, res)=>{
     const idRepresentante = parseInt(req.params.idRepresentante);
     visitadorBusiness.getRutasByIdRepresentante(idRepresentante).then(me=>{
