@@ -32,6 +32,8 @@ async function getMedicosByEmailRepresentante(email){
            where
             t5.email=$1 
         )
+        order by 
+         t0.name
         `;
        
         return await dbUtils.getRows(sql,[email]);
