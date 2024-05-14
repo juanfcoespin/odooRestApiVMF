@@ -20,6 +20,8 @@ async function getInventarioByMailRepresentante(email){
 		 t3.id,
          t3.name,
          t4.name
+        order by
+         t3.name
         `;
         
         return await dbUtils.getRows(sql,[email]);
