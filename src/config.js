@@ -42,7 +42,7 @@ const confDb={
     password: "odoo17",
     database: "vmf.jbp.com.ec",
     odoo:{
-        url: "http://vmf.jbp.com.ec:1769",
+        url: "http://localhost:1769",
         idUser:2,
         user: "admin",
         pwd: "AtLsV971*"
