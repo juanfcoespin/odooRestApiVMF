@@ -20,6 +20,12 @@ const confDb={
     port: 5432,
     password: "openpgpwd",
     database: "vmf",
+    odoo:{
+        url: "http://localhost:1769",
+        idUser:2,
+        user: "admin",
+        pwd: "AtLsV971*"
+    } 
 };
 
 //servidor

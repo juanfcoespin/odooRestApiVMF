@@ -2,6 +2,7 @@ const conf = require('../config');
 const dbUtils = require('../utils/dbUtils');
 const objUtils = require('../utils/objectUtils');
 const cicloBusiness = require('./cicloBusiness');
+const axios = require('axios');
 
 async function getRutasByEmailRepresentante(email){
     try{
@@ -384,18 +385,52 @@ async function getLineasControlExhibicionById(idVisita){
     }
 }
 async function insertLineaControlExhibicion(idVisita, linea){
-    let articulo='';
-    if(linea.tipoCE=='Competencia')
-        articulo=linea.articulo;
-    else
-        articulo=linea.articulo.name; //del catalogo de producto terminado o material de exhibición
-    sql=`
-    insert into tt_visitas_control_exhibicion_linea(visita_id, articulo, cantidad, tipo, precio, estado, comentario)
-    values($1, $2, $3, $4, $5, $6, $7)
-    `;
-    params=[idVisita, articulo, linea.cantidad, linea.tipoCE, linea.precio, linea.estadoArticuloCE, linea.comentario];
-    if(!await dbUtils.execute(sql, params))
-        throw(`No se registró la linea de Control Exhibicion correspondiente al artículo ${articulo}!!`);
+    try{
+        let articulo='';
+        if(linea.tipoCE=='Competencia')
+            articulo=linea.articulo;
+        else
+            articulo=linea.articulo.name; //del catalogo de producto terminado o material de exhibición
+        sql=`
+        insert into tt_visitas_control_exhibicion_linea(visita_id, articulo, cantidad, tipo, precio, estado, comentario)
+        values($1, $2, $3, $4, $5, $6, $7)
+        `;
+        params=[idVisita, articulo, linea.cantidad, linea.tipoCE, linea.precio, linea.estadoArticuloCE, linea.comentario];
+        await dbUtils.execute(sql, params);
+        sql="select max(id) id  from tt_visitas_control_exhibicion_linea";
+        item = await dbUtils.getItem(sql);
+        await guardarFoto(item.id, linea.foto);
+        
+    }catch(e){
+        throw("insertLineaControlExhibicion: "+e);
+    }
+    
+
+}
+async function guardarFoto(idLinea, foto){
+    console.log(idLinea);
+    //console.log(foto);
+    odooConf = conf.confDb.odoo;
+    console.log(odooConf);
+    url = odooConf.url+'/jsonrpc';
+    console.log(url);
+    axios.post(url,{
+            jsonrpc: "2.0",
+            method: "call",
+            params: {
+                service: "object",
+                method: "execute_kw",
+                args: [conf.confDb.database, odooConf.idUser, odooConf.pwd, "tt_visitas.control_exhibicion_linea", "write", [[idLinea],{"foto": foto}]],
+                "kwargs": {}
+            },
+            "id": 2
+        }
+    ).then(response => {
+        console.log('Response:', response.data);
+    })
+    .catch(error => {
+        console.log('Error:', error)
+    });
 }
 async function insertLineaVisita(tipoUnidad, idVisita, linea){
     tabla =`tt_visitas_visita_${tipoUnidad}`; 
