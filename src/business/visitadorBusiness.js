@@ -185,14 +185,13 @@ async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email, fechaDesd
     where
          tx.email=$1
          and tx.ciclo_id in (${idsCiclo})
-         
-        `;
+    `;
         if(fechaDesde && fechaHasta){
           fechaDesde = fechaDesde.substring(0, 10);
           fechaHasta = fechaHasta.substring(0, 10);
           sql+=` and to_date(to_char(tx.fecha,'yyyy-mm-dd'), 'yyyy-mm-dd') between to_date('${fechaDesde}', 'yyyy-mm-dd') and to_date('${fechaHasta}', 'yyyy-mm-dd')`  
         }
-        sql+=' order by tx.dia_ciclo';
+        sql+=' order by tx.dia_ciclo limit 200';
         return await dbUtils.getRows(sql, [email]);
     }catch(e){
         return{
@@ -393,13 +392,51 @@ async function insertLineaControlExhibicion(idVisita, linea){
         throw(`No se registró la linea de Control Exhibicion correspondiente al artículo ${articulo}!!`);
 }
 async function insertLineaVisita(tipoUnidad, idVisita, linea){
+    tabla =`tt_visitas_visita_${tipoUnidad}`; 
     sql=`
-    insert into tt_visitas_visita_${tipoUnidad}_linea(visita_id, articulo_id, cantidad)
+    insert into ${tabla}_linea(visita_id, articulo_id, cantidad)
     values($1, $2, $3)
     `;
     params=[idVisita, linea.articulo.id, linea.cantidad];
     if(!await dbUtils.execute(sql, params))
         throw(`No se registró la linea de visita correspondiente al artículo ${linea.articulo.name}!!`);
+    else
+        await descontarInventario(idVisita, tabla, linea);
+}
+async function descontarInventario(idVisita, tabla, linea){
+    try{
+        idBodega = await getIdBodega(idVisita, tabla);
+        sql=`
+            update tt_visitas_inventario
+             set cantidad = cantidad - $1
+            where 
+             bodega_id = $2
+             and articulo_id = $3
+        `;
+        params=[linea.cantidad, idBodega, linea.articulo.id];
+        await dbUtils.execute(sql, params);
+    }catch(e){
+        throw('descontarInventario '+e);
+    }
+    
+
+}
+async function getIdBodega(idVisita, tabla){
+    try{
+        sql=`
+        select 
+         t1.representante_id
+        from 
+         ${tabla} t0 inner join
+         tt_visitas_ruta t1 on t1.id=t0.ruta_id
+        where 
+            t0.id=$1
+        `;
+        item = await dbUtils.getItem(sql, [idVisita]);
+        return item.representante_id;
+    }catch(e){
+        throw('descontarInventario '+e);
+    }
 }
 async function getIdRuta(visita){
     try{

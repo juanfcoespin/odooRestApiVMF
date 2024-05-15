@@ -14,4 +14,10 @@ router.get('/getByEmailRepresentante/:email', (req, res)=>{
         res.send(me);
     });
 });
+router.post('/getByFiltro', (req, res)=>{
+    const filtro = req.body;
+    pedidoBusiness.getByMailRepresentante(filtro.email, filtro.fechaDesde, filtro.fechaHasta).then(me=>{
+        res.send(me);
+    });
+});
 module.exports = router;

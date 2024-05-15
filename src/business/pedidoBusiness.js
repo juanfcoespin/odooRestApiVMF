@@ -2,7 +2,7 @@ const conf = require('../config');
 const dbUtils = require('../utils/dbUtils');
 
 
-async function getByMailRepresentante(email){
+async function getByMailRepresentante(email, fechaDesde=null, fechaHasta=null){
     try{
         var sql=`
         select 
@@ -22,9 +22,13 @@ async function getByMailRepresentante(email){
             tt_base_contacto t3 on t3.id=t0.distribuidor_id inner join
             tt_visitas_farmacia t4 on t4.id=t0.farmacia_id
         where
-            t2.email=$1
-        order by t0.fecha
-        `;
+            t2.email=$1`;
+        if(fechaDesde && fechaHasta){
+            fechaDesde = fechaDesde.substring(0, 10);
+            fechaHasta = fechaHasta.substring(0, 10);
+            sql+=` and to_date(to_char(t0.fecha,'yyyy-mm-dd'), 'yyyy-mm-dd') between to_date('${fechaDesde}', 'yyyy-mm-dd') and to_date('${fechaHasta}', 'yyyy-mm-dd')`  
+        }
+        sql+=" order by t0.fecha limit 200";
 
         var pedidos=await dbUtils.getRows(sql,[email]);
         for(var pedido of pedidos){
