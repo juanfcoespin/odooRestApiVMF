@@ -12,6 +12,8 @@ async function query(sql, params=null){
         if(e && e.routine)
             error+="\r\nError: "+e.routine;
         error+='\r\nsql: '+sql;
+        if(params)
+            error+=params;
         throw(error);
     }finally{
         await clientDb.end();
@@ -26,8 +28,8 @@ async function execute(sql, params){
     return (ms.rowCount>0)?true:false;
 }
 
-async function getItem(sql){
-    const matrix = await getRows(sql);
+async function getItem(sql, params=null){
+    const matrix = await getRows(sql, params);
     if(matrix && matrix.length>0)
      return matrix[0];
     return null; 

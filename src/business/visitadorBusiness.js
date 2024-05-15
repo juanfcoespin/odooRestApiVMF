@@ -304,9 +304,7 @@ async function saveVisitas(visitas){
 }
 async function saveVisita(visita){
     try{
-        console.log(visita);
         const idRuta = await getIdRuta(visita);
-        console.log(idRuta);
         if(!idRuta){
             const error=`
                 No existen rutas para  el representante ${visita.idRepresentante} en el diaCiclo:${visita.diaCicloActual}
@@ -316,8 +314,9 @@ async function saveVisita(visita){
         if(idRuta && idRuta.error)
             throw(idRuta.error);
         //odoo maneja la hora utf, para traer la fecha actual hay que hacer lo siguiente
+        const tabla=`tt_visitas_visita_${visita.tipoUnidad}`;
         var sql=`
-        insert into tt_visitas_visita_${visita.tipoUnidad}(ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id)
+        insert into ${tabla} (ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id)
         values($1, $2, now()- interval '${conf.confGlobal.zonaHorariaUTF} hour', $3, $4);
         `;
         var params=[visita.idCiclo, idRuta,visita.comentario, visita.idUnidad];
@@ -325,25 +324,32 @@ async function saveVisita(visita){
         var inserto=await dbUtils.execute(sql, params);
         if(!inserto)
             throw('No se registró la visita!!');
-        sql=`select id from tt_visitas_visita_${visita.tipoUnidad} order by id desc limit 1`;
+        sql=`select id from ${tabla} order by id desc limit 1`;
         
         const me= await dbUtils.getItem(sql);
         const idVisita = me.id;
-        if(visita.lineas){
-            for(let linea of visita.lineas){
-                await insertLineaVisita(visita.tipoUnidad, idVisita, linea);
+        try{ // si hay un error en las transacciones hijo se hace rollback
+            if(visita.lineas){
+                for(let linea of visita.lineas){
+                    await insertLineaVisita(visita.tipoUnidad, idVisita, linea);
+                }
             }
-        }
-        if(visita.lineasCE){
-            for(let linea of visita.lineasCE){
-                await insertLineaControlExhibicion(idVisita, linea);
+            if(visita.lineasCE){
+                for(let linea of visita.lineasCE){
+                    await insertLineaControlExhibicion(idVisita, linea);
+                }
             }
+            
+            return {
+                id: idVisita,
+            };
+
+        }catch(e){// se hacer rollback
+            sql=`delete from ${tabla} where id=$1`;
+            await dbUtils.execute(sql,[idVisita]);
+            throw('\r\n'+'saveVisita(): '+e);
         }
         
-        return {
-            id: idVisita,
-        };
-
     }catch(e){
         throw('\r\n'+'saveVisita(): '+e);
     }
@@ -435,7 +441,7 @@ async function getIdBodega(idVisita, tabla){
         item = await dbUtils.getItem(sql, [idVisita]);
         return item.representante_id;
     }catch(e){
-        throw('descontarInventario '+e);
+        throw('getIdBodega '+e);
     }
 }
 async function getIdRuta(visita){
