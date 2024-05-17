@@ -55,7 +55,7 @@ async function getRutasByEmailRepresentante(email){
             t2.Activo=True
 			and t3.email=$1
         ) tx
-        order by tx.dia_ciclo
+        order by tx.dia_ciclo, tx.name
         `;
         return await dbUtils.getRows(sql,[email]);
     }catch(e){
@@ -101,9 +101,9 @@ async function getByMail(email){
         select 
             t0.id,
             t1.name tipo_representante,
-            t0.meta_visitas_medicos_ciclo,
-            t0.meta_visitas_farmacias_ciclo,
-			t2.meta_ventas
+            COALESCE(t0.meta_visitas_medicos_ciclo,0) meta_visitas_medicos_ciclo,
+            COALESCE(t0.meta_visitas_farmacias_ciclo,0) meta_visitas_farmacias_ciclo,
+            COALESCE(t2.meta_ventas,0) meta_ventas
         from
             tt_visitas_representante t0 inner join
             tt_visitas_tipo_representante t1 on t1.id=t0.tipo_representante_id left outer join
@@ -116,7 +116,7 @@ async function getByMail(email){
         var visitas = await getVisitasByIdsCicloEmailRepresentante([currentCiclo.id], email);
         var numVisitasMedico=0;
         var numVisitasFarmacia=0;
-        var totalFacturado = await pedidoBusiness.getMontoFacturadoEnEsteMesByEmailRepresentante(email);
+        
         if(visitas){
             const visitasMedico = visitas.filter(f=>f.tipo=='medico');
             if(visitasMedico)
@@ -125,15 +125,21 @@ async function getByMail(email){
             if(visitasFarmacia)
                 numVisitasFarmacia=visitasFarmacia.length;
         }
-        
+        var kpis=[
+            {nombre: "Visitas Médicos", meta: info.meta_visitas_medicos_ciclo, valor: numVisitasMedico},
+            {nombre: "Visitas Farmacia", meta: info.meta_visitas_farmacias_ciclo, valor: numVisitasFarmacia},
+            
+        ];
+        if(info.tipo_representante=='Mercaderista'){
+            var totalFacturado = await pedidoBusiness.getMontoFacturadoEnEsteMesByEmailRepresentante(email);
+            kpis.push(
+                {nombre: "Pedidos (USD)", meta: info.meta_ventas, valor: totalFacturado},
+            );
+        }
         return {
             id: info.id,
             tipoRepresentante: info.tipo_representante,
-            kpis:[
-                {nombre: "Visitas Médicos", meta: info.meta_visitas_medicos_ciclo, valor: numVisitasMedico},
-                {nombre: "Visitas Farmacia", meta: info.meta_visitas_farmacias_ciclo, valor: numVisitasFarmacia},
-                {nombre: "Pedidos (USD)", meta: info.meta_ventas, valor: totalFacturado},
-            ],
+            kpis: kpis
         }
     }catch(e){
         return {
