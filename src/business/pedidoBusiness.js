@@ -165,9 +165,28 @@ async function savePedido(pedido){
         throw('\r\n'+'savePedido(): '+e);
     }
 }
+async function getMontoFacturadoEnEsteMesByEmailRepresentante(email){
+    try{
+        sql=`
+        select 
+           COALESCE(sum(t0.valor),0) monto --ifnull
+        from tt_visitas_factura t0 inner join
+            tt_visitas_pedido t1 on t1.id=t0.pedido_id inner join
+            tt_visitas_representante t2 on t2.id=t1.representante_id
+        where
+            t2.email=$1
+            and to_char(t0.fecha,'yyyy-mm')=to_char(now(),'yyyy-mm')
+        `;
+        var item = await dbUtils.getItem(sql,[email]);
+        return item.monto;
+    }catch{
+        return 0;
+    }
+}
 module.exports={
     getByMailRepresentante,
     savePedidos,
+    getMontoFacturadoEnEsteMesByEmailRepresentante,
 }
     
     

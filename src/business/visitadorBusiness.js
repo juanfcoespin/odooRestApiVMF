@@ -2,6 +2,7 @@ const conf = require('../config');
 const dbUtils = require('../utils/dbUtils');
 const objUtils = require('../utils/objectUtils');
 const cicloBusiness = require('./cicloBusiness');
+const pedidoBusiness = require('./pedidoBusiness');
 const axios = require('axios');
 
 async function getRutasByEmailRepresentante(email){
@@ -101,13 +102,39 @@ async function getByMail(email){
             t0.id,
             t1.name tipo_representante,
             t0.meta_visitas_medicos_ciclo,
-            t0.meta_visitas_farmacias_ciclo
+            t0.meta_visitas_farmacias_ciclo,
+			t2.meta_ventas
         from
             tt_visitas_representante t0 inner join
-            tt_visitas_tipo_representante t1 on t1.id=t0.tipo_representante_id
+            tt_visitas_tipo_representante t1 on t1.id=t0.tipo_representante_id left outer join
+			tt_visitas_periodo_representante t2 on t2.representante_id=t0.id and t2.activo=true
         where
-            t0.email='${email}' limit 1`;
-        return await dbUtils.getItem(sql);
+            t0.email=$1 limit 1
+        `;
+        var info = await dbUtils.getItem(sql,[email]);
+        var currentCiclo = await cicloBusiness.getCicloActual();
+        var visitas = await getVisitasByIdsCicloEmailRepresentante([currentCiclo.id], email);
+        var numVisitasMedico=0;
+        var numVisitasFarmacia=0;
+        var totalFacturado = await pedidoBusiness.getMontoFacturadoEnEsteMesByEmailRepresentante(email);
+        if(visitas){
+            const visitasMedico = visitas.filter(f=>f.tipo=='medico');
+            if(visitasMedico)
+                numVisitasMedico=visitasMedico.length;
+            const visitasFarmacia = visitas.filter(f=>f.tipo=='farmacia');
+            if(visitasFarmacia)
+                numVisitasFarmacia=visitasFarmacia.length;
+        }
+        
+        return {
+            id: info.id,
+            tipoRepresentante: info.tipo_representante,
+            kpis:[
+                {nombre: "Visitas Médicos", meta: info.meta_visitas_medicos_ciclo, valor: numVisitasMedico},
+                {nombre: "Visitas Farmacia", meta: info.meta_visitas_farmacias_ciclo, valor: numVisitasFarmacia},
+                {nombre: "Pedidos (USD)", meta: info.meta_ventas, valor: totalFacturado},
+            ],
+        }
     }catch(e){
         return {
             "error": '\r\ngetByMail: '+e
