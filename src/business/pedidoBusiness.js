@@ -27,6 +27,8 @@ async function getByMailRepresentante(email, fechaDesde=null, fechaHasta=null){
             fechaDesde = fechaDesde.substring(0, 10);
             fechaHasta = fechaHasta.substring(0, 10);
             sql+=` and to_date(to_char(t0.fecha,'yyyy-mm-dd'), 'yyyy-mm-dd') between to_date('${fechaDesde}', 'yyyy-mm-dd') and to_date('${fechaHasta}', 'yyyy-mm-dd')`  
+        }else{ //trae los pedidos de la fecha actual 3 meses atras
+            sql+=` and to_date(to_char(t0.fecha,'yyyy-mm-dd'), 'yyyy-mm-dd') between CURRENT_DATE - INTERVAL '3 months' and now()`  
         }
         sql+=" order by t0.fecha limit 200";
 
