@@ -8,4 +8,9 @@ router.get('/getByEmailRepresentante/:email', (req, res)=>{
         res.send(me);
     });
 });
+router.get('/getEspaciosContratados', (req, res)=>{
+    farmaciaBusiness.getEspaciosContratados().then(me=>{
+        res.send(me);
+    });
+});
 module.exports = router;

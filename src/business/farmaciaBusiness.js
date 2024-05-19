@@ -46,6 +46,24 @@ async function getFarmaciasByEmailRepresentante(email){
         };
     }
 }
+async function getEspaciosContratados(){
+    try{
+        var sql=`
+        select
+         id, name
+        from 
+         tt_visitas_espacio_contratado
+        where
+         activo=true
+        `;
+        return await dbUtils.getRows(sql);
+    }catch(e){
+        return {
+            error: 'getEspaciosContratados() '+e
+        }
+    }
+}
 module.exports={
     getFarmaciasByEmailRepresentante,
+    getEspaciosContratados,
 }

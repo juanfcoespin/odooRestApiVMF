@@ -6,6 +6,7 @@ async function getInventarioByMailRepresentante(email){
          t3.id "idArticulo",
          t3.name articulo,
          t4.name "tipoArticulo",
+         t4.orden "tipoArticuloOrden",
          sum(t2.cantidad) "cantidad"
         from
          tt_visitas_inventario t2  inner join
@@ -18,10 +19,11 @@ async function getInventarioByMailRepresentante(email){
         group by
 		 t3.id,
          t3.name,
-         t4.name
+         t4.name,
+         t4.orden
         order by
+         t4.orden,
          t3.name
-
         `;
         
         return await dbUtils.getRows(sql,[email]);
