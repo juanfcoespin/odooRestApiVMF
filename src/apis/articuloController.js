@@ -13,6 +13,11 @@ router.get('/getArticulosVenta', (req, res)=>{
         res.send(me);
     });
 });
+router.get('/getArticulosCompetencia', (req, res)=>{
+    articuloBusiness.getArticulosCompetencia().then(me=>{
+        res.send(me);
+    });
+});
 router.get('/getMaterialPromocional', (req, res)=>{
     articuloBusiness.getMaterialPromocional().then(me=>{
         res.send(me);

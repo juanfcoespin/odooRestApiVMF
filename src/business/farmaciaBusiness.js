@@ -4,6 +4,7 @@ async function getFarmaciasByEmailRepresentante(email){
         var sql=`
         select
         t0.id,
+        t0.ruc,
         t0.name farmacia,
         t3.name "tipoFarmacia",
         t0.categoria,

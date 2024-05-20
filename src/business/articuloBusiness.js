@@ -54,10 +54,17 @@ async function getArticulosVenta(){
         };
     }
 }
-async function getMaterialPromocional(){
+async function getArticulosCompetencia(){
     try{
         var sql=`
-            select id,name from tt_visitas_espacio_contratado
+        select
+         t0.id,
+         t0.name
+        from
+         tt_visitas_articulo t0 inner join
+         tt_visitas_tipo_articulo t1 on t1.id=t0.tipo_articulo_id
+        where
+         t1.name='Producto Competencia' 
         `;
 
         return await dbUtils.getRows(sql);
@@ -67,9 +74,23 @@ async function getMaterialPromocional(){
         };
     }
 }
+async function getMaterialPromocional(){
+    try{
+        var sql=`
+            select id,name from tt_visitas_espacio_contratado
+        `;
+
+        return await dbUtils.getRows(sql);
+    }catch(e){
+        return{
+            "error": '\r\ngetMedicosByEmailRepresentante'+e
+        };
+    }
+}
 
 module.exports={
     getInventarioByMailRepresentante,
     getArticulosVenta,
     getMaterialPromocional,
+    getArticulosCompetencia,
 }
