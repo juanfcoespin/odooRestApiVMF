@@ -55,7 +55,7 @@ async function getEspaciosContratados(){
         from 
          tt_visitas_espacio_contratado
         where
-         activo=true
+         fecha_fin is not null and fecha_fin >= current_date
         `;
         return await dbUtils.getRows(sql);
     }catch(e){
