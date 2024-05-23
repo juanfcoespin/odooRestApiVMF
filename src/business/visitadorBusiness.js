@@ -175,6 +175,7 @@ async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email, fechaDesd
         tx.id "idUnidadVisita",
         tx.name "unidadVisita",
         tx.tipo,
+        tx.personas_visita "personasVisita",
         tx.comentario
     from(
         select
@@ -182,6 +183,7 @@ async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email, fechaDesd
          t1.name "ciclo",
          t2.dia_ciclo,
          t0.fecha,
+         '' personas_visita,
          t3.id,
          t3.name,
          'medico' tipo,
@@ -201,6 +203,7 @@ async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email, fechaDesd
          t1.name  "ciclo",
          t2.dia_ciclo,
          t0.fecha,
+         t0.personas_visita,
          t3.id,
          t3.name,
          'farmacia' tipo,
@@ -214,7 +217,6 @@ async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email, fechaDesd
          tt_visitas_ruta t2 on t2.id = t0.ruta_id inner join
          tt_visitas_farmacia t3 on t3.id=t0.farmacia_id inner join
          tt_visitas_representante t4 on t4.id=t2.representante_id
-        
        ) tx
     where
          tx.email=$1
@@ -349,11 +351,23 @@ async function saveVisita(visita){
             throw(idRuta.error);
         //odoo maneja la hora utf, para traer la fecha actual hay que hacer lo siguiente
         const tabla=`tt_visitas_visita_${visita.tipoUnidad}`;
-        var sql=`
-        insert into ${tabla} (ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id)
-        values($1, $2, now()- interval '${conf.confGlobal.zonaHorariaUTF} hour', $3, $4);
-        `;
-        var params=[visita.idCiclo, idRuta,visita.comentario, visita.idUnidad];
+        var sql="";
+        if(visita.tipoUnidad=='medico'){
+            sql=`
+                insert into ${tabla} (ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id)
+                values($1, $2, now()- interval '${conf.confGlobal.zonaHorariaUTF} hour', $3, $4);
+            `;
+            var params=[visita.idCiclo, idRuta,visita.comentario, visita.idUnidad];
+        }
+        if(visita.tipoUnidad=='farmacia'){
+            sql=`
+                insert into ${tabla} (ciclo_id, ruta_id, fecha, personas_visita, comentario, ${visita.tipoUnidad}_id)
+                values($1, $2, now()- interval '${conf.confGlobal.zonaHorariaUTF} hour', $3, $4, $5);
+            `;
+            var params=[visita.idCiclo, idRuta, visita.personasVisita, visita.comentario, visita.idUnidad];
+            console.log(sql);
+            console.log(params);
+        }
         
         var inserto=await dbUtils.execute(sql, params);
         if(!inserto)

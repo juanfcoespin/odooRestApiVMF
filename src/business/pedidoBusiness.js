@@ -116,10 +116,10 @@ async function saveFacturas(pedido){
     for(let factura of pedido.facturas){
         const fecha=dbUtils.getDateFromJs(factura.fecha);
         var sql=`
-        insert into tt_visitas_factura(pedido_id, fecha, num_factura_distribuidor, valor)
-        values($1,${fecha}, $2, $3);
+        insert into tt_visitas_factura(pedido_id, fecha, num_factura_distribuidor ,num_pedido_distribuidor, valor)
+        values($1,${fecha}, $2, $3, $4);
         `;
-        var params=[pedido.idBdd, factura.numFactura, factura.valor];
+        var params=[pedido.idBdd, factura.numFactura, factura.numPedido, factura.valor];
         await dbUtils.execute(sql, params);
     }
 }
