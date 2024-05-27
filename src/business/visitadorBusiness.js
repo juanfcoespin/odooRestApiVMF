@@ -354,9 +354,13 @@ async function saveVisita(visita){
         const tabla=`tt_visitas_visita_${visita.tipoUnidad}`;
         var sql="";
         if(visita.tipoUnidad=='medico'){
-            sql=`
+            /*sql=`
                 insert into ${tabla} (ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id)
                 values($1, $2, now()- interval '${conf.confGlobal.zonaHorariaUTF} hour', $3, $4);
+            `;*/
+            sql=`
+                insert into ${tabla} (ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id)
+                values($1, $2, now(), $3, $4);
             `;
             var params=[visita.idCiclo, idRuta,visita.comentario, visita.idUnidad];
         }
