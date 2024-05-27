@@ -126,15 +126,14 @@ async function getByMail(email){
                 numVisitasFarmacia=visitasFarmacia.length;
         }
         var kpis=[
-            {nombre: "Visitas Médicos", meta: info.meta_visitas_medicos_ciclo, valor: numVisitasMedico},
             {nombre: "Visitas Farmacia", meta: info.meta_visitas_farmacias_ciclo, valor: numVisitasFarmacia},
-            
         ];
-        if(info.tipo_representante=='Mercaderista'){
-            var totalFacturado = await pedidoBusiness.getMontoFacturadoEnEsteMesByEmailRepresentante(email);
+        var totalFacturado = await pedidoBusiness.getMontoFacturadoEnEsteMesByEmailRepresentante(email);
             kpis.push(
                 {nombre: "Pedidos (USD)", meta: info.meta_ventas, valor: totalFacturado},
             );
+        if(info.tipo_representante!='Mercaderista'){ // los mercaderistas no visitan médicos
+            kpis.push({nombre: "Visitas Médicos", meta: info.meta_visitas_medicos_ciclo, valor: numVisitasMedico});
         }
         return {
             id: info.id,
