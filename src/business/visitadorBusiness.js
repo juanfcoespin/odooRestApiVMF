@@ -367,7 +367,7 @@ async function saveVisita(visita){
         if(visita.tipoUnidad=='farmacia'){
             sql=`
                 insert into ${tabla} (ciclo_id, ruta_id, fecha, personas_visita, comentario, ${visita.tipoUnidad}_id)
-                values($1, $2, now()- interval '${conf.confGlobal.zonaHorariaUTF} hour', $3, $4, $5);
+                values($1, $2, now(), $3, $4, $5);
             `;
             var params=[visita.idCiclo, idRuta, visita.personasVisita, visita.comentario, visita.idUnidad];
             console.log(sql);
