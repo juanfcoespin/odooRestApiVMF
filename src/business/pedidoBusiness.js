@@ -145,6 +145,7 @@ async function savePedido(pedido){
         sql=`select id from tt_visitas_pedido order by id desc limit 1`;
         const me= await dbUtils.getItem(sql);
         const idPedido = me.id;
+        pedido.idBdd=idPedido;
         for(let linea of pedido.lineas){
             if(!linea.porcentajeDescuento)
                 linea.porcentajeDescuento=0;
@@ -159,6 +160,8 @@ async function savePedido(pedido){
                 throw(`No se registró la linea del pedido correspondiente al artículo ${linea.articulo.name}!!`);
             }
         }
+        if(pedido.facturas && pedido.facturas.length>0)
+            saveFacturas(pedido);
         return {
             id: idPedido,
         };
