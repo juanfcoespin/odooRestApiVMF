@@ -16,7 +16,7 @@ async function getCicloActual(){
         `;
         var cicloActual = await dbUtils.getItem(sql);
         if(cicloActual){
-            diaCicloActual = getDiaCicloActual(cicloActual.fechaInicio);
+            diaCicloActual = await getDiaCicloActual(cicloActual);
             cicloActual.diaCicloActual = diaCicloActual;
         }
         return cicloActual;
@@ -27,18 +27,41 @@ async function getCicloActual(){
     }
     
 }
-function getDiaCicloActual(fechaInicio){
-    if(!fechaInicio)
+async function getDiaCicloActual(cicloActual){
+    if(!cicloActual)
+        throw('\r\ngetDiaCicloActual(): No se ha especificado el ciclo actual');
+    if(!cicloActual.fechaInicio)
         throw('\r\ngetDiaCicloActual(): No se ha especificado Fecha de inicio de ciclo');
     var diaCiclo=0;
     var fechaActual = fechaUtils.obtenerFechaActual();
-    var fechaDiaCiclo = fechaUtils.getDateFromStrDate(fechaInicio);
+    var fechaDiaCiclo = fechaUtils.getDateFromStrDate(cicloActual.fechaInicio);
     while(fechaDiaCiclo<=fechaActual){
         fechaDiaCiclo.setDate(fechaDiaCiclo.getDate()+1); 
         if(fechaUtils.esDiaLaboral(fechaDiaCiclo))
             diaCiclo++;
     } 
+    var diasFeriadoEnCiclo = await getDiasFeriadoEnCiclo(cicloActual.id)
+    if(diasFeriadoEnCiclo<diaCiclo)
+        diaCiclo-=diasFeriadoEnCiclo;
     return diaCiclo;
+}
+async function getDiasFeriadoEnCiclo(idCiclo){
+    try{
+        var sql=`
+            select 
+                count(*) num
+            from
+                tt_visitas_ciclo_promocional_feriados
+            where
+                ciclo_id=$1
+        `;
+        var ms= await dbUtils.getItem(sql, [idCiclo]);
+        if(ms)
+            return ms.num;
+        return 0;
+    }catch(e){
+        throw('getDiasFeriadoEnCiclo: No se pudo extraer los feriados')
+    }
 }
 async function getCiclos(){
     try{
