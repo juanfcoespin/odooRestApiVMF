@@ -25,12 +25,48 @@ async function getInventarioByMailRepresentante(email){
          t4.orden,
          t3.name
         `;
-        
-        return await dbUtils.getRows(sql,[email]);
+        var ms= await dbUtils.getRows(sql,[email]);
+        for(let item of ms){
+            item.especialidades = await getIdsEspecialidadesPorArticulo(item.idArticulo);
+        }
+        return ms;
     }catch(e){
         return{
-            "error": '\r\getMedicosByEmailRepresentante'+e
+            "error": '\r\ngetInventarioByMailRepresentante'+e
         };
+    }
+}
+async function getIdsEspecialidadesPorArticulo(idArticulo){
+    try{
+        var sql=`
+        select
+         distinct(especialidad_id) id
+        from
+            tt_visitas_especialidad_medica_articulo
+        where 
+            articulo_id=$1
+        `;
+        var items= await dbUtils.getRows(sql,[idArticulo]);
+        var ms=[];
+        items.forEach(item => {
+            ms.push(item.id);
+        });
+        return ms;
+    }catch(e){
+        throw('getIdsEspecialidadesPorArticulo: '+e)
+    }
+}
+async function getEspecialidades(idArticulo){
+    try{
+        var sql=`
+        select
+           id, name
+        from
+            tt_visitas_especialidad
+        `;
+        return await dbUtils.getRows(sql);
+    }catch(e){
+        throw('getIdsEspecialidadesPorArticulo: '+e)
     }
 }
 async function getArticulosVenta(){
@@ -93,4 +129,5 @@ module.exports={
     getArticulosVenta,
     getMaterialPromocional,
     getArticulosCompetencia,
+    getEspecialidades,
 }

@@ -23,4 +23,9 @@ router.get('/getMaterialPromocional', (req, res)=>{
         res.send(me);
     });
 });
+router.get('/getEspecialidades', (req, res)=>{
+    articuloBusiness.getEspecialidades().then(me=>{
+        res.send(me);
+    });
+});
 module.exports = router;

@@ -7,6 +7,7 @@ async function getMedicosByEmailRepresentante(email){
         t0.name medico,
         t0.categoria,
         t0.cedula,
+        t0.especialidad_id,
         t2.name especialidad,
         t1.name ciudad,
         t0.celular,
@@ -35,7 +36,6 @@ async function getMedicosByEmailRepresentante(email){
         order by 
          t0.name
         `;
-       
         return await dbUtils.getRows(sql,[email]);
     }catch(e){
         return{
