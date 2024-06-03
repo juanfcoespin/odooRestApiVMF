@@ -113,6 +113,9 @@ async function getByMail(email){
         `;
         var info = await dbUtils.getItem(sql,[email]);
         var currentCiclo = await cicloBusiness.getCicloActual();
+        if(!currentCiclo)
+            throw('No hay ciclo actual activo!!. Notifique al administrador!!');
+        
         var visitas = await getVisitasByIdsCicloEmailRepresentante([currentCiclo.id], email);
         var numVisitasMedico=0;
         var numVisitasFarmacia=0;
