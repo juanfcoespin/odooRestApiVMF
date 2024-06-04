@@ -7,4 +7,9 @@ router.get('/getCiclos', (req, res)=>{
         res.send(me);
     });
 });
+router.get('/getCicloActual', (req, res)=>{
+    cicloBusiness.getCicloActual().then(me=>{
+        res.send(me);
+    });
+});
 module.exports = router;

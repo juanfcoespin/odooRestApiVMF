@@ -20,6 +20,7 @@ async function getCicloActual(){
             cicloActual.diaCicloActual = diaCicloActual;
         }
         return cicloActual;
+
     }catch(e){
         return {
             "error": '\r\n'+'getCicloActual() '+e
@@ -45,8 +46,9 @@ async function getDiaCicloActual(cicloActual){
         fechaDiaCiclo.setDate(fechaDiaCiclo.getDate()+1); 
     } 
     var diasFeriadoEnCiclo = await getDiasFeriadoEnCiclo(cicloActual.id)
-    if(diasFeriadoEnCiclo<diaCiclo)
+    if(diasFeriadoEnCiclo<diaCiclo && diaCiclo>=20)
         diaCiclo-=diasFeriadoEnCiclo;
+    //console.log(diaCiclo);
     return diaCiclo;
 }
 async function getDiasFeriadoEnCiclo(idCiclo){

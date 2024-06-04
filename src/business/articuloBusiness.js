@@ -1,4 +1,5 @@
 const dbUtils = require('../utils/dbUtils');
+
 async function getInventarioByMailRepresentante(email){
     try{
         var sql=`
