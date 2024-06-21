@@ -231,7 +231,7 @@ async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email, fechaDesd
           fechaHasta = fechaHasta.substring(0, 10);
           sql+=` and to_date(to_char(tx.fecha,'yyyy-mm-dd'), 'yyyy-mm-dd') between to_date('${fechaDesde}', 'yyyy-mm-dd') and to_date('${fechaHasta}', 'yyyy-mm-dd')`  
         }
-        sql+=' order by tx.dia_ciclo limit 200';
+        sql+=' order by tx.dia_ciclo';
         return await dbUtils.getRows(sql, [email]);
     }catch(e){
         return{
@@ -249,6 +249,7 @@ async function getVisitasPendientesByEmailRepresentante(email){
             if(rutas.error)
                 throw(rutas.error); 
             const visitas = await getVisitasByIdsCicloEmailRepresentante(cicloActual.id, email);
+            
             /*
             Para las visitas pendientes se toma en cuenta los siguientes lineamientos:
              1. El representante solo puede vistar una vez al médico en el ciclo
@@ -258,15 +259,19 @@ async function getVisitasPendientesByEmailRepresentante(email){
                 throw(visitas.error); 
             //analizamos las rutas que hay que excluir
             //médicos
-            const visitasMedidos=visitas.filter(v=>v.tipo=='medico');
+            const visitasMedicos=visitas.filter(v=>v.tipo=='medico');
+            //console.log('medicos visitados')
+            //console.log(visitasMedicos.filter(v=>v.idUnidadVisita==20498 || v.unidadVisita=='SANCHEZ SANCHEZ JOSE GONZALO'));
             const visitasFarmacia=visitas.filter(v=>v.tipo=='farmacia');
 
             let rutasPendientes = objUtils.getObjectCopy(rutas); //en donde se calculará las rutas pendientes a visitar del representante
             rutasPendientes=rutasPendientes.sort((a, b) => a.diaCiclo - b.diaCiclo); //se orden por día de ciclo en orden ascendente;
             //se quitan los médicos ya visitados
-            visitasMedidos.forEach(vm=>{
+            visitasMedicos.forEach(vm=>{
                 rutasPendientes = rutasPendientes.filter(ruta=>!(ruta.idUnidadVisita==vm.idUnidadVisita && vm.tipo==ruta.tipo));
             });
+            //20498
+            //console.log(rutasPendientes.filter(r=>r.idUnidadVisita==20498));
             //se quitan las farmacias ya visitadas
             //numVisitasCiclo
             rutasFarmaciaAQuitar=[];
