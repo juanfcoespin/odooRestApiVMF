@@ -34,7 +34,7 @@ const confGlobal={
     } 
 };*/
 
-//servidor
+//servidor produccion
 const confDb={
     host: "localhost",
     user: "odoo17",
