@@ -541,6 +541,8 @@ async function getIdBodega(idVisita, tabla){
 }
 async function getIdRuta(visita){
     try{
+        if(visita && visita.diaCicloActual<0)
+            visita.diaCicloActual=1;
         var sql=`
         select 
          id 
