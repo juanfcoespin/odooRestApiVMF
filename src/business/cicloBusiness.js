@@ -52,6 +52,8 @@ async function getDiaCicloActual(cicloActual){
     //if(diasFeriadoEnCiclo<diaCiclo && diaCiclo>=20)
     diaCiclo-=diasFeriadoEnCiclo;
     console.log(diaCiclo);
+    if(diaCiclo<0)
+        diaCiclo=1;
     return diaCiclo;
 }
 async function getDiasFeriadoEnCiclo(idCiclo){
