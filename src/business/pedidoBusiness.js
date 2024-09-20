@@ -116,8 +116,8 @@ async function saveFacturas(pedido){
     for(let factura of pedido.facturas){
         const fecha=dbUtils.getDateFromJs(factura.fecha);
         var sql=`
-        insert into tt_visitas_factura(pedido_id, fecha, num_factura_distribuidor ,num_pedido_distribuidor, valor)
-        values($1,${fecha}, $2, $3, $4);
+        insert into tt_visitas_factura(pedido_id, fecha, num_factura_distribuidor ,num_pedido_distribuidor, valor, create_date, write_date)
+        values($1,${fecha}, $2, $3, $4, now(), now());
         `;
         var params=[pedido.idBdd, factura.numFactura, factura.numPedido, factura.valor];
         await dbUtils.execute(sql, params);
@@ -136,8 +136,8 @@ async function savePedido(pedido){
             };
         }
         var sql=`
-        insert into tt_visitas_pedido(representante_id,distribuidor_id, farmacia_id, fecha, correo_adicional, observaciones)
-        values($1, $2, $3, ${fecha}, $4, $5);
+        insert into tt_visitas_pedido(representante_id,distribuidor_id, farmacia_id, fecha, correo_adicional, observaciones, create_date, write_date)
+        values($1, $2, $3, ${fecha}, $4, $5, now(), now());
         `;
         var params=[pedido.idRepresentante, pedido.distribuidor.id, pedido.farmacia.id, pedido.correoAdicional, pedido.observaciones];
         await dbUtils.execute(sql, params);
@@ -150,8 +150,8 @@ async function savePedido(pedido){
             if(!linea.porcentajeDescuento)
                 linea.porcentajeDescuento=0;
             sql=`
-            insert into tt_visitas_pedido_linea(pedido_id, articulo_id, precio, porcentaje_descuento, cantidad, cant_bonificada)
-            values($1, $2, $3, $4, $5, $6)
+            insert into tt_visitas_pedido_linea(pedido_id, articulo_id, precio, porcentaje_descuento, cantidad, cant_bonificada, create_date, write_date)
+            values($1, $2, $3, $4, $5, $6, now(), now())
             `;
             params=[idPedido, linea.articulo.id, linea.articulo.precio, linea.porcentajeDescuento/100, linea.cantidad, linea.bonificacion];
             try{

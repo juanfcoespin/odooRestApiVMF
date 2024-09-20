@@ -367,15 +367,15 @@ async function saveVisita(visita){
                 values($1, $2, now()- interval '${conf.confGlobal.zonaHorariaUTF} hour', $3, $4);
             `;*/
             sql=`
-                insert into ${tabla} (ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id)
-                values($1, $2, now(), $3, $4);
+                insert into ${tabla} (ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id, create_date, write_date)
+                values($1, $2, now(), $3, $4, now(), now());
             `;
             var params=[visita.idCiclo, idRuta,visita.comentario, visita.idUnidad];
         }
         if(visita.tipoUnidad=='farmacia'){
             sql=`
-                insert into ${tabla} (ciclo_id, ruta_id, fecha, personas_visita, comentario, ${visita.tipoUnidad}_id)
-                values($1, $2, now(), $3, $4, $5);
+                insert into ${tabla} (ciclo_id, ruta_id, fecha, personas_visita, comentario, ${visita.tipoUnidad}_id, create_date, write_date)
+                values($1, $2, now(), $3, $4, $5, now(), now());
             `;
             var params=[visita.idCiclo, idRuta, visita.personasVisita, visita.comentario, visita.idUnidad];
             console.log(sql);
