@@ -513,6 +513,7 @@ async function descontarInventario(idVisita, tabla, linea){
             where 
              bodega_id = $2
              and articulo_id = $3
+             and activo = true
         `;
         params=[linea.cantidad, idBodega, linea.articulo.id];
         await dbUtils.execute(sql, params);
