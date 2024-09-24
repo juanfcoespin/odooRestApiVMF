@@ -2,7 +2,7 @@ const conf = require('../config');
 const dbUtils = require('../utils/dbUtils');
 
 
-async function getByMailRepresentante(email, fechaDesde=null, fechaHasta=null){
+async function getByFiltro(me){
     try{
         var sql=`
         select 
@@ -20,34 +20,56 @@ async function getByMailRepresentante(email, fechaDesde=null, fechaHasta=null){
             tt_base_contacto t1 on t1.id=t0.distribuidor_id inner join
             tt_visitas_representante t2 on t2.id=t0.representante_id inner join
             tt_base_contacto t3 on t3.id=t0.distribuidor_id inner join
-            tt_visitas_farmacia t4 on t4.id=t0.farmacia_id
-        where
+            tt_visitas_farmacia t4 on t4.id=t0.farmacia_id`;
+        if(me.tipoPedido && me.tipoPedido=='validados'){ //que tienen facturas
+            sql+=` inner join tt_visitas_factura t5 on t5.pedido_id=t0.id`;
+        } 
+        sql+=` where
             t2.email=$1`;
-        if(fechaDesde && fechaHasta){
-            fechaDesde = fechaDesde.substring(0, 10);
-            fechaHasta = fechaHasta.substring(0, 10);
+        if(me.fechaDesde && me.fechaHasta){
+            fechaDesde = me.fechaDesde.substring(0, 10);
+            fechaHasta = me.fechaHasta.substring(0, 10);
             sql+=` and to_date(to_char(t0.fecha,'yyyy-mm-dd'), 'yyyy-mm-dd') between to_date('${fechaDesde}', 'yyyy-mm-dd') and to_date('${fechaHasta}', 'yyyy-mm-dd')`  
         }else{ //trae los pedidos de la fecha actual 3 meses atras
             sql+=` and to_date(to_char(t0.fecha,'yyyy-mm-dd'), 'yyyy-mm-dd') between CURRENT_DATE - INTERVAL '2 months' and now()`  
         }
+        if(me.tipoPedido && me.tipoPedido=='porValidar'){ //que no tienen facturas
+            sql+=` and t0.id not in (select distinct(pedido_id) from tt_visitas_factura)`; 
+        }
         sql+=" order by t0.fecha limit 200";
-
-        var pedidos=await dbUtils.getRows(sql,[email]);
+        var pedidos=await dbUtils.getRows(sql,[me.email]);
         for(var pedido of pedidos){
             await setLineasEnPedido(pedido);
             await setFacturasEnPedido(pedido);
         }
-        pedidos.forEach(pedido=>{
+        for(let pedido of pedidos){
             pedido.distribuidor={id:pedido.distribuidor_id, name:pedido.distribuidorName};
             pedido.farmacia={id:pedido.farmacia_id, name:pedido.farmaciaName};
             pedido.total = pedido.subtotal - pedido.descuento;
-        });
+            if(me.tipoPedido && me.tipoPedido=='Validados'){ //que tienen facturas
+                pedido.facturas = await getFacturasByIdPedido(pedido.idBdd);
+            }
+        }
         return pedidos;
     }catch(e){
         return {
-            "error": '\r\ngetByMail: '+e
+            "error": '\r\getByFiltro: '+e
         };
     }
+}
+async function getFacturasByIdPedido(id){
+    var sql=`
+    select
+        fecha,
+        num_factura_distribuidor,
+        num_pedido_distribuidor,
+        valor
+    from
+        tt_visitas_factura
+    where
+        pedido_id=$1
+    `;
+    return await dbUtils.getRows(sql,[id]);
 }
 async function setLineasEnPedido(pedido){
     var sql=`
@@ -189,7 +211,7 @@ async function getMontoFacturadoEnEsteMesByEmailRepresentante(email){
     }
 }
 module.exports={
-    getByMailRepresentante,
+    getByFiltro,
     savePedidos,
     getMontoFacturadoEnEsteMesByEmailRepresentante,
 }
