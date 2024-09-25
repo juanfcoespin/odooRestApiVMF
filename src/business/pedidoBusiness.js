@@ -84,6 +84,7 @@ async function setFacturasEnPedido(pedido){
     select
         fecha,
         num_factura_distribuidor "numFactura",
+        num_pedido_distribuidor "numPedido",
         valor
     from tt_visitas_factura
     where pedido_id=$1
