@@ -8,15 +8,18 @@ router.post('/savePedidos', (req, res)=>{
         res.send(me);
     });
 });
+//se utiliza para el catálogo
 router.get('/getByEmailRepresentante/:email', (req, res)=>{
     const email = req.params.email;
-    pedidoBusiness.getByMailRepresentante(email).then(me=>{
+    const filtro={};
+    filtro.email=email;
+    pedidoBusiness.getByFiltro(filtro).then(me=>{
         res.send(me);
     });
 });
 router.post('/getByFiltro', (req, res)=>{
     const filtro = req.body;
-    pedidoBusiness.getByMailRepresentante(filtro.email, filtro.fechaDesde, filtro.fechaHasta).then(me=>{
+    pedidoBusiness.getByFiltro(filtro).then(me=>{
         res.send(me);
     });
 });
