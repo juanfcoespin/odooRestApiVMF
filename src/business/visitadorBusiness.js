@@ -349,6 +349,8 @@ async function saveVisitas(visitas){
 }
 async function saveVisita(visita){
     try{
+        if(visita.diaCicloActual>20)
+            visita.diaCicloActual=20;
         const idRuta = await getIdRuta(visita);
         if(!idRuta){
             const error=`
