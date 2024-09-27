@@ -10,7 +10,7 @@ async function getCicloActual(){
          to_char(fecha_fin , 'yyyy-mm-dd') "fechaFin" 
         from tt_visitas_ciclo_promocional
         where
-         current_Date between fecha_inicio and fecha_fin
+         (NOW() - INTERVAL '5 hours')::date between fecha_inicio and fecha_fin
          and activo = true
         limit 1
         `;
