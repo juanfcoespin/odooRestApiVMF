@@ -37,7 +37,7 @@ async function getDiaCicloActual(cicloActual){
     var diaCiclo=0;
     var fechaActual = fechaUtils.obtenerFechaActual();
     var fechaDiaCiclo = fechaUtils.getDateFromStrDate(cicloActual.fechaInicio);
-    //console.log(fechaActual);
+    console.log(fechaActual);
     //console.log(fechaDiaCiclo);
     while(fechaDiaCiclo<=fechaActual){
         if(fechaUtils.esDiaLaboral(fechaDiaCiclo)){
