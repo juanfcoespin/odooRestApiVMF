@@ -22,5 +22,11 @@ router.get('/getFacturaPedido', (req, res)=>{
         res.send(me);
     });
 });
+router.get('/getRepresentante', (req, res)=>{
+    cuboBusiness.getRepresentante().then(me=>{
+        res.send(me);
+    });
+});
+
 
 module.exports = router;

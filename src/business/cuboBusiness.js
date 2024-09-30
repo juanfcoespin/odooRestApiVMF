@@ -53,10 +53,24 @@ async function getFacturaPedido(){
         };
     }
 }
+async function getRepresentante(){
+    try{
+        var sql=`
+        select * from vmf_vw_representante
+        `;
+        return await dbUtils.getRows(sql);
+        
+    }catch(e){
+        return {
+            "error": '\r\n'+'getRepresentante() '+e
+        };
+    }
+}
 
 module.exports={
     getMedicos,
     getCabeceraPedidos,
     getLineaPedidos,
     getFacturaPedido,
+    getRepresentante,
 }
