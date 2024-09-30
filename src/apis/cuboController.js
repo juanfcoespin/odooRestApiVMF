@@ -7,4 +7,20 @@ router.get('/getMedicos', (req, res)=>{
         res.send(me);
     });
 });
+router.get('/getCabeceraPedidos', (req, res)=>{
+    cuboBusiness.getCabeceraPedidos().then(me=>{
+        res.send(me);
+    });
+});
+router.get('/getLineaPedidos', (req, res)=>{
+    cuboBusiness.getLineaPedidos().then(me=>{
+        res.send(me);
+    });
+});
+router.get('/getFacturaPedido', (req, res)=>{
+    cuboBusiness.getFacturaPedido().then(me=>{
+        res.send(me);
+    });
+});
+
 module.exports = router;
