@@ -18,7 +18,6 @@ async function getFarmaciasByEmailRepresentante(email){
 		t0.num_visitas_por_ciclo,
 		t0.recibe_muestra_medica,
 		t0.recibe_material_promocional,
-		t0.categoria,
         t0.latitud,
         t0.longitud
        from
