@@ -57,5 +57,10 @@ router.get('/getControlExhibicionFarmacia', (req, res)=>{
         res.send(me);
     });
 });
+router.get('/getInventarioActivo', (req, res)=>{
+    cuboBusiness.getDataCubo('vmf_vw_inventario_activo').then(me=>{
+        res.send(me);
+    });
+});
 
 module.exports = router;
