@@ -62,5 +62,10 @@ router.get('/getInventarioActivo', (req, res)=>{
         res.send(me);
     });
 });
+router.get('/getMetasRepresentante', (req, res)=>{
+    cuboBusiness.getDataCubo('vmf_vw_metas_representante').then(me=>{
+        res.send(me);
+    });
+});
 
 module.exports = router;
