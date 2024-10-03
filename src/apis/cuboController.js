@@ -67,5 +67,10 @@ router.get('/getMetasRepresentante', (req, res)=>{
         res.send(me);
     });
 });
+router.get('/getRutaRepresentante', (req, res)=>{
+    cuboBusiness.getDataCubo('vmf_vw_ruta_representante').then(me=>{
+        res.send(me);
+    });
+});
 
 module.exports = router;
