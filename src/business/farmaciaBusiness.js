@@ -26,7 +26,8 @@ async function getFarmaciasByEmailRepresentante(email){
 		tt_base_persona_contacto t2 on t2.id=t0.lider_punto_id left outer join
         tt_visitas_tipo_farmacia t3 on t3.id=t0.tipo_farmacia_id
        where
-        t0.id in(
+        t0.activo=true
+        and t0.id in(
            select 
             distinct(t3.tt_visitas_farmacia_id)
            from 

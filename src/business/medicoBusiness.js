@@ -23,7 +23,8 @@ async function getMedicosByEmailRepresentante(email){
         tt_base_ciudad t1 on t1.id=t0.ciudad_id inner join
         tt_visitas_especialidad t2 on t2.id=t0.especialidad_id
        where
-        t0.id in(
+        t0.activo=true
+        and t0.id in(
            select 
             distinct(t3.tt_visitas_medico_id)
            from 
