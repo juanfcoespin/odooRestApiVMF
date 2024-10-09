@@ -70,6 +70,26 @@ async function getEspecialidades(idArticulo){
         throw('getIdsEspecialidadesPorArticulo: '+e)
     }
 }
+async function getGetKardexByArticuloYrepresentante(idArticulo){
+    try{
+        var sql=`
+        select
+         fecha - INTERVAL '5 hours' "fecha",
+         "unidadVisita",
+         cantidad
+        from
+         vw_kardex_articulo
+        where
+         representante_id=$1
+         and ciclo_id=$2
+         and articulo_id=$3 
+        order by 1
+        `;
+        return await dbUtils.getRows(sql, [idRepresentante, idciclo, idArticulo]);
+    }catch(e){
+        throw('getGetKardexArticulo: '+e)
+    }
+}
 async function getArticulosVenta(){
     try{
         var sql=`
