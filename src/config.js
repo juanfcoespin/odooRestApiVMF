@@ -5,7 +5,7 @@ const confGlobal={
 };
 
 //mac (mac, odoo)
-const confDb = {
+/*const confDb = {
     host: "localhost",
     user: "odoo",
     port: 5432,
@@ -17,7 +17,7 @@ const confDb = {
         user: "admin",
         pwd: "AtLsV971*"
     } 
-};
+};*/
 
 //portatil oficina
 /*const confDb={
@@ -35,7 +35,7 @@ const confDb = {
 };*/
 
 //servidor produccion
-/*const confDb={
+const confDb={
     host: "localhost",
     user: "odoo17",
     port: 5432,
@@ -47,7 +47,7 @@ const confDb = {
         user: "admin",
         pwd: "AtLsV971*"
     } 
-};*/
+};
 module.exports = {
     confDb,
     confGlobal,

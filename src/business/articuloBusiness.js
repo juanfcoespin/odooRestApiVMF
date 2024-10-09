@@ -1,4 +1,5 @@
 const dbUtils = require('../utils/dbUtils');
+const cicloBusiness = require('./cicloBusiness');
 
 async function getInventarioByMailRepresentante(email){
     try{
@@ -70,7 +71,7 @@ async function getEspecialidades(idArticulo){
         throw('getIdsEspecialidadesPorArticulo: '+e)
     }
 }
-async function getGetKardexByArticuloYrepresentante(idArticulo){
+async function getGetKardexByArticuloYrepresentante(idCiclo, idRepresentante, idArticulo){
     try{
         var sql=`
         select
@@ -85,7 +86,7 @@ async function getGetKardexByArticuloYrepresentante(idArticulo){
          and articulo_id=$3 
         order by 1
         `;
-        return await dbUtils.getRows(sql, [idRepresentante, idciclo, idArticulo]);
+        return await dbUtils.getRows(sql, [idRepresentante, idCiclo, idArticulo]);
     }catch(e){
         throw('getGetKardexArticulo: '+e)
     }
@@ -151,4 +152,5 @@ module.exports={
     getMaterialPromocional,
     getArticulosCompetencia,
     getEspecialidades,
+    getGetKardexByArticuloYrepresentante,
 }

@@ -13,6 +13,16 @@ router.get('/getArticulosVenta', (req, res)=>{
         res.send(me);
     });
 });
+router.post('/getGetKardexByArticuloYrepresentante', (req, res)=>{
+    const idRepresentante = req.body.idRepresentante;
+    const idCiclo = req.body.idCiclo;
+    const idArticulo = req.body.idArticulo;
+    articuloBusiness.getGetKardexByArticuloYrepresentante(idCiclo, idRepresentante, idArticulo).then(me=>{
+        res.send(me);
+    });
+});
+
+
 router.get('/getArticulosCompetencia', (req, res)=>{
     articuloBusiness.getArticulosCompetencia().then(me=>{
         res.send(me);
