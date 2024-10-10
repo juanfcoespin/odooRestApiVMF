@@ -371,6 +371,10 @@ async function saveVisita(visita){
                 insert into ${tabla} (ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id)
                 values($1, $2, now()- interval '${conf.confGlobal.zonaHorariaUTF} hour', $3, $4);
             `;*/
+            if(await VisitaMedicoEnCicloRegistrada(visita.idRepresentante, visita.idCiclo,visita.idUnidad)){
+                throw('En la base de datos ya se ha registrado la visita de este médico en el presente ciclo!!');
+            }
+            console.log('Permitido resgistrar medico');
             sql=`
                 insert into ${tabla} (ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id, create_date, write_date)
                 values($1, $2, now(), $3, $4, now(), now());
@@ -383,8 +387,6 @@ async function saveVisita(visita){
                 values($1, $2, now(), $3, $4, $5, now(), now());
             `;
             var params=[visita.idCiclo, idRuta, visita.personasVisita, visita.comentario, visita.idUnidad];
-            console.log(sql);
-            console.log(params);
         }
         
         var inserto=await dbUtils.execute(sql, params);
@@ -419,6 +421,29 @@ async function saveVisita(visita){
     }catch(e){
         throw('\r\n'+'saveVisita(): '+e);
     }
+}
+async function VisitaMedicoEnCicloRegistrada(idRepresentante, idCiclo, idMedico){
+    try{
+   
+        sql=`
+            select 
+             count(*) num
+            from 
+             tt_visitas_visita_medico t0 inner join
+             tt_visitas_ruta t1 on t1.id=t0.ruta_id
+            where
+             t1.representante_id = $1
+             and t0.ciclo_id = $2
+             and t0.medico_id= $3
+        `;
+        var ms=await dbUtils.getItem(sql, [idRepresentante, idCiclo, idMedico]);
+        if(ms && ms.num)
+            return (ms.num>0);
+        return false;
+    }catch(e){
+        throw('\r\n'+'VisitaMedicoEnCicloRegistrada(): '+e);
+    }
+
 }
 async function getLineasVisitaById(visita){
     try{
@@ -575,6 +600,7 @@ module.exports={
     saveVisitas,
     getVisitasByIdsCicloEmailRepresentanteConLineas,
     getVisitasCiclosAnteriorByEmailRepresentante,
+    VisitaMedicoEnCicloRegistrada,
 }
     
     

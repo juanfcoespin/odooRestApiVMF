@@ -33,6 +33,12 @@ router.post('/saveVisitas', (req, res)=>{
         res.send(me);
     });
 });
+router.post('/tmp', (req, res)=>{
+    const me = req.body;
+    visitadorBusiness.VisitaMedicoEnCicloRegistrada(me.idRepresentante, me.idCiclo, me.idMedico).then(me=>{
+        res.send(me);
+    });
+});
 router.post('/savePedidos', (req, res)=>{
     const pedidos = req.body;
     visitadorBusiness.savePedidos(pedidos).then(me=>{

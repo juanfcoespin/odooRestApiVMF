@@ -19,7 +19,6 @@ async function getCicloActual(){
             diaCicloActual = await getDiaCicloActual(cicloActual);
             cicloActual.diaCicloActual = diaCicloActual;
         }
-        console.log(cicloActual);
         return cicloActual;
 
     }catch(e){
@@ -37,13 +36,9 @@ async function getDiaCicloActual(cicloActual){
     var diaCiclo=0;
     var fechaActual = fechaUtils.obtenerFechaActual();
     var fechaDiaCiclo = fechaUtils.getDateFromStrDate(cicloActual.fechaInicio);
-    console.log(fechaActual);
-    console.log(fechaDiaCiclo);
     while(fechaDiaCiclo<=fechaActual){
         if(fechaUtils.esDiaLaboral(fechaDiaCiclo)){
             diaCiclo++;
-            console.log(fechaDiaCiclo);
-            console.log(diaCiclo);
         }
         fechaDiaCiclo.setDate(fechaDiaCiclo.getDate()+1); 
     } 
@@ -52,7 +47,6 @@ async function getDiaCicloActual(cicloActual){
     //console.log(diasFeriadoEnCiclo);
     //if(diasFeriadoEnCiclo<diaCiclo && diaCiclo>=20)
     diaCiclo-=diasFeriadoEnCiclo;
-    console.log(diaCiclo);
     if(diaCiclo<=0)
         return 1;
     if(diaCiclo>20)
