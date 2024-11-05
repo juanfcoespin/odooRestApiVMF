@@ -12,6 +12,7 @@ const app = express();
 var cors = require('cors')
 
 const port = 3000;
+//const port = 3030; //para pruebas
 
 //para iniciar el servicio: node server.js
 app.use(bodyParser.json({limit: '50mb'}));//Set Request Size Limit
