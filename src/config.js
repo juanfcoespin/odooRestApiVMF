@@ -20,7 +20,7 @@ const confGlobal={
 };*/
 
 //portatil oficina
-const confDb={
+/*const confDb={
     host: "localhost",
     user: "openpg",
     port: 5432,
@@ -32,15 +32,29 @@ const confDb={
         user: "admin",
         pwd: "AtLsV971*"
     } 
-};
+};*/
 
 //servidor produccion
-/*const confDb={
+const confDb={
     host: "localhost",
     user: "odoo17",
     port: 5432,
     password: "odoo17",
     database: "vmf.jbp.com.ec",
+    odoo:{
+        url: "http://localhost:1769",
+        idUser:2,
+        user: "admin",
+        pwd: "AtLsV971*"
+    } 
+};
+//servidor pruebas
+/*const confDb={
+    host: "localhost",
+    user: "odoo17",
+    port: 5432,
+    password: "odoo17",
+    database: "testvmf.jbp.com.ec",
     odoo:{
         url: "http://localhost:1769",
         idUser:2,
