@@ -154,7 +154,7 @@ async function getByMail(email){
 }
 async function getVisitasByIdsCicloEmailRepresentanteConLineas(me){
     try{
-        let visitas = await getVisitasByIdsCicloEmailRepresentante(me.idCiclo, me.email, me.fechaDesde, me.fechaHasta);
+        let visitas = await getVisitasByIdsCicloEmailRepresentante([me.cicloSeleccionado.id], me.email, me.fechaDesde, me.fechaHasta);
         for(let visita of visitas){
             visita.lineas = await getLineasVisitaById(visita);
         }
@@ -387,6 +387,8 @@ async function saveVisita(visita){
                 values($1, $2, to_timestamp($3, 'YYYY-MM-DD HH:MI:SS'), $4, $5, $6, now(), now());
             `;
             var params=[visita.idCiclo, idRuta, visita.fecha, visita.personasVisita, visita.comentario, visita.idUnidad];
+            console.log(sql);
+            console.log(params);
         }
         var inserto=await dbUtils.execute(sql, params);
         if(!inserto)
@@ -497,12 +499,12 @@ async function insertLineaControlExhibicion(idVisita, linea){
 
 }
 async function guardarFoto(idLinea, foto){
-    console.log(idLinea);
+    //console.log(idLinea);
     //console.log(foto);
     odooConf = conf.confDb.odoo;
-    console.log(odooConf);
+    //console.log(odooConf);
     url = odooConf.url+'/jsonrpc';
-    console.log(url);
+    //console.log(url);
     axios.post(url,{
             jsonrpc: "2.0",
             method: "call",
