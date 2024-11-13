@@ -377,14 +377,14 @@ async function saveVisita(visita){
             console.log('Permitido resgistrar medico');
             sql=`
                 insert into ${tabla} (ciclo_id, ruta_id, fecha, comentario, ${visita.tipoUnidad}_id, create_date, write_date)
-                values($1, $2, to_timestamp($3, 'YYYY-MM-DD HH:MI:SS'), $4, $5, now(), now());
+                values($1, $2, $3, $4, $5, now(), now());
             `;
             var params=[visita.idCiclo, idRuta, visita.fecha, visita.comentario, visita.idUnidad];
         }
         if(visita.tipoUnidad=='farmacia'){
             sql=`
                 insert into ${tabla} (ciclo_id, ruta_id, fecha, personas_visita, comentario, ${visita.tipoUnidad}_id, create_date, write_date)
-                values($1, $2, to_timestamp($3, 'YYYY-MM-DD HH:MI:SS'), $4, $5, $6, now(), now());
+                values($1, $2, $3, $4, $5, $6, now(), now());
             `;
             var params=[visita.idCiclo, idRuta, visita.fecha, visita.personasVisita, visita.comentario, visita.idUnidad];
             console.log(sql);
