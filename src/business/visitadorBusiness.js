@@ -349,7 +349,8 @@ async function saveVisitas(visitas){
 }
 async function saveVisita(visita){
     try{
-        
+        if(!visita.fecha)
+            throw('Requiere actualizar la versión del aplicativo a la 3.4.6.18 o superior para capturar la fecha de la visita!!');
         if(visita.diaCicloActual<=0)
             visita.diaCicloActual=1;        
         if(visita.diaCicloActual>20)
