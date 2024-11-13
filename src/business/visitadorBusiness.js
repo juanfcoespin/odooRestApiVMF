@@ -174,7 +174,7 @@ async function getVisitasByIdsCicloEmailRepresentante(idsCiclo, email, fechaDesd
         tx."idVisita",
         tx.ciclo,
         tx.dia_ciclo "diaCiclo",
-        to_char(tx.fecha,'yyyy-mm-dd') "fechaVisita",
+        to_char(tx.fecha,'yyyy-mm-dd HH24:mi:ss') "fechaVisita",
         tx.fecha,
         tx.id "idUnidadVisita",
         tx.name "unidadVisita",

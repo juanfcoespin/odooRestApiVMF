@@ -1,11 +1,11 @@
-//node server.js (para el servidor)
 //npm run dev (para desarrollo)
+//node server.js (para el servidor)
 const confGlobal={
     zonaHorariaUTF: -5
 };
 
 //mac (mac, odoo)
-/*const confDb = {
+const confDb = {
     host: "localhost",
     user: "odoo",
     port: 5432,
@@ -17,7 +17,7 @@ const confGlobal={
         user: "admin",
         pwd: "AtLsV971*"
     } 
-};*/
+};
 
 //portatil oficina
 /*const confDb={
@@ -49,7 +49,7 @@ const confGlobal={
     } 
 };*/
 //servidor pruebas
-const confDb={
+/*const confDb={
     host: "localhost",
     user: "odoo17",
     port: 5432,
@@ -61,7 +61,7 @@ const confDb={
         user: "admin",
         pwd: "AtLsV971*"
     } 
-};
+};*/
 module.exports = {
     confDb,
     confGlobal,
