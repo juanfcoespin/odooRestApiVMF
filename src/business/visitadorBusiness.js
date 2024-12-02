@@ -156,7 +156,7 @@ async function getVisitasByIdsCicloEmailRepresentanteConLineas(me){
     try{
         let visitas = await getVisitasByIdsCicloEmailRepresentante([me.cicloSeleccionado.id], me.email, me.fechaDesde, me.fechaHasta);
         for(let visita of visitas){
-            visita.lineas = await getLineasVisitaById(visita);
+            visita.lineas = await getLineasVisitaById(visita.idVisita, visita.tipo);
         }
         return visitas;
     }catch(e){
