@@ -57,4 +57,12 @@ router.get('/getVisitasCicloAnteriorByEmailRepresentante/:email', (req, res)=>{
         res.send(me);
     });
 });
+router.get('/getLineasVisitaById/:id/:tipo/', (req, res)=>{
+    const id = req.params.id;
+    const tipo = req.params.tipo;
+    visitadorBusiness.getLineasVisitaById(id, tipo).then(me=>{
+        res.send(me);
+    });
+});
+//getLineasVisitaById
 module.exports = router;

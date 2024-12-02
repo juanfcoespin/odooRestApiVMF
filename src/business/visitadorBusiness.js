@@ -84,9 +84,9 @@ async function getVisitasCiclosAnteriorByEmailRepresentante(email){
             if(ids.length==3)
                 idsCicloAnterior=ids[1].id+', '+ids[2].id;
             let ms= await getVisitasByIdsCicloEmailRepresentante(idsCicloAnterior,email);
-            for(let visita of ms){
+            /*for(let visita of ms){
                 visita.lineas = await getLineasVisitaById(visita);
-            }
+            }*/ // 02Dic2024: se optimiza para que bajo demanda traiga las lineas ya que se hace muy pesada la carga
             return ms;
         }
     }catch(e){
@@ -447,18 +447,18 @@ async function VisitaMedicoEnCicloRegistrada(idRepresentante, idCiclo, idMedico)
     }
 
 }
-async function getLineasVisitaById(visita){
+async function getLineasVisitaById(id, tipo){
     try{
         sql=`
         select 
          t0.articulo_id, 
          t1.name "articulo",
          t0.cantidad
-        from tt_visitas_visita_${visita.tipo}_linea t0 inner join
+        from tt_visitas_visita_${tipo}_linea t0 inner join
          tt_visitas_articulo t1 on t1.id=t0.articulo_id
         where t0.visita_id=$1
     `;
-    var ms=await dbUtils.getRows(sql, [visita.idVisita]);
+    var ms=await dbUtils.getRows(sql, [id]);
     return ms;
     }catch(e){
         throw('\r\n'+'getLineasVisitaById(): '+e);
@@ -603,6 +603,7 @@ module.exports={
     getVisitasByIdsCicloEmailRepresentanteConLineas,
     getVisitasCiclosAnteriorByEmailRepresentante,
     VisitaMedicoEnCicloRegistrada,
+    getLineasVisitaById,
 }
     
     
