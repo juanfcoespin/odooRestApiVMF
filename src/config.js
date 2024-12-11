@@ -35,7 +35,7 @@ const confGlobal={
 };*/
 
 //servidor produccion
-const confDb={
+/*const confDb={
     host: "localhost",
     user: "odoo17",
     port: 5432,
@@ -47,9 +47,9 @@ const confDb={
         user: "admin",
         pwd: "AtLsV971*"
     } 
-};
+};*/
 //servidor pruebas
-/*const confDb={
+const confDb={
     host: "localhost",
     user: "odoo17",
     port: 5432,
@@ -61,7 +61,7 @@ const confDb={
         user: "admin",
         pwd: "AtLsV971*"
     } 
-};*/
+};
 module.exports = {
     confDb,
     confGlobal,
