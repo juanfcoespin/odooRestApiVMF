@@ -35,38 +35,56 @@ async function getDiaCicloActual(cicloActual){
         throw('\r\ngetDiaCicloActual(): No se ha especificado Fecha de inicio de ciclo');
     var diaCiclo=0;
     var fechaActual = fechaUtils.obtenerFechaActual();
+    //console.log('fechaActual: ',fechaActual);
+    //console.log('cicloActual.fechaInicio: ',cicloActual.fechaInicio);
     var fechaDiaCiclo = fechaUtils.getDateFromStrDate(cicloActual.fechaInicio);
+    var diasFeriadoEnCiclo = await getDiasFeriadoEnCiclo(cicloActual.id)
+    //console.log('diasFeriadoEnCiclo: ',diasFeriadoEnCiclo);
     while(fechaDiaCiclo<=fechaActual){
+        //console.log('fechaDiaCiclo: ',fechaDiaCiclo);
         if(fechaUtils.esDiaLaboral(fechaDiaCiclo)){
-            diaCiclo++;
+            //si el dia no es feriado
+            if(!esFeriado(fechaDiaCiclo, diasFeriadoEnCiclo)){
+                diaCiclo++;
+                //console.log('diaCiclo: ',diaCiclo);
+            }else
+                console.log('Feriado Identificado: ',fechaDiaCiclo);
+            
         }
         fechaDiaCiclo.setDate(fechaDiaCiclo.getDate()+1); 
     } 
-    //console.log(diaCiclo,'antes feriados')
-    var diasFeriadoEnCiclo = await getDiasFeriadoEnCiclo(cicloActual.id)
-    //console.log(diasFeriadoEnCiclo);
-    //if(diasFeriadoEnCiclo<diaCiclo && diaCiclo>=20)
-    diaCiclo-=diasFeriadoEnCiclo;
     if(diaCiclo<=0)
         return 1;
     if(diaCiclo>20)
         return 20
+    console.log('Respuesta: ',diaCiclo);
     return diaCiclo;
+}
+function esFeriado(fechaDiaCiclo, diasFeriadoEnCiclo){
+    //console.log('fechaDiaCiclo: ',fechaDiaCiclo.getTime());
+    for(let fecha of diasFeriadoEnCiclo){
+        //console.log('fecha: ',fecha.getTime());
+        if(fecha.getTime()==fechaDiaCiclo.getTime())
+            return true;
+    }
+    return false;
 }
 async function getDiasFeriadoEnCiclo(idCiclo){
     try{
         var sql=`
             select 
-                count(*) num
+                fecha_feriado
             from
                 tt_visitas_ciclo_promocional_feriados
             where
                 ciclo_id=$1
         `;
-        var ms= await dbUtils.getItem(sql, [idCiclo]);
-        if(ms)
-            return ms.num;
-        return 0;
+        var ms=[];
+        var matrix= await dbUtils.getRows(sql, [idCiclo]);
+        for(let item of matrix){
+            ms.push(item.fecha_feriado);
+        }
+        return ms;
     }catch(e){
         throw('getDiasFeriadoEnCiclo: No se pudo extraer los feriados')
     }
